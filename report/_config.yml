@@ -9,9 +9,10 @@ color_scheme: light
 nav_sort: case_insensitive
 back_to_top: true
 back_to_top_text: "Back to top"
-baseurl: "/Expense-Tracker-System/report"
-url: "https://zagrosbaban1.github.io"
+baseurl: "/report"
+url: "https://unibo-dtm-se-2324-ets.github.io"
 footer_content: "Software engineering report for the Expense Tracker System project."
 
 exclude:
   - sections
+
