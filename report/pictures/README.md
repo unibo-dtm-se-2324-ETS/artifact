@@ -30,7 +30,7 @@ Store the screenshots used in the final university report in this folder.
 
 ### Recurring Expenses Page
 
-Screenshot not added yet.
+![Recurring expenses page](./07-recurring-expenses-page.png)
 
 ### Date-wise Report Page
 

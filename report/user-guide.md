@@ -56,7 +56,7 @@ The following screenshots show the main pages of the system used in this project
 
 ### Recurring Expenses Page
 
-Screenshot not added yet.
+![Recurring expenses page](./pictures/07-recurring-expenses-page.png)
 
 ### Date-wise Report Page
 

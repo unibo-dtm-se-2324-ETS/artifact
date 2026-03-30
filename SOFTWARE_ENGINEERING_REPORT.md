@@ -371,13 +371,15 @@ This page provides yearly analysis so the user can review long-term spending pat
 
 ![Figure 9. Yearly Report Page](report/pictures/10-year-report-page.png)
 
-### Figure 10. User Profile Page
+### Figure 10. Recurring Expenses Page
+This page is used to define repeated expenses such as subscriptions or monthly bills. The user can choose item, amount, category, frequency, and start date. The system then automatically adds expenses when the due date arrives.
+
+![Figure 10. Recurring Expenses Page](report/pictures/07-recurring-expenses-page.png)
+
+### Figure 11. User Profile Page
 This page stores and updates user information such as name, email, mobile number, default currency, and default category. It also provides a way to personalize system behavior according to user preferences.
 
-![Figure 10. User Profile Page](report/pictures/11-profile-page.png)
-
-### Note for Final Submission
-The recurring expenses screenshot is still missing. Once you add that image, I can insert it here as an additional labeled figure.
+![Figure 11. User Profile Page](report/pictures/11-profile-page.png)
 
 ## Developer Guide
 
