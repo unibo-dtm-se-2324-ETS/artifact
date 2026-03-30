@@ -1,4 +1,4 @@
----
+﻿---
 title: User Guide
 nav_order: 10
 ---
@@ -26,18 +26,50 @@ nav_order: 10
 - Historical analysis through reports
 - Exportable records for further processing
 
-## Suggested Screenshot List
+## Screenshots
 
-Add the following screenshots to the `pictures/` folder for the final report:
+The following screenshots show the main pages of the system used in this project:
 
-- Registration page
-- Login page
-- Dashboard page
-- Add expense page
-- Manage expenses page
-- Categories and budgets page
-- Recurring expenses page
-- Profile page
-- Date-wise report page
-- Month-wise report page
-- Year-wise report page
+### Login Page
+
+![Login page](./pictures/01-login-page.png)
+
+### Registration Page
+
+![Registration page](./pictures/02-registration-page.png)
+
+### Dashboard Page
+
+![Dashboard page](./pictures/03-dashboard-page.png)
+
+### Add Expense Page
+
+![Add expense page](./pictures/04-add-expense-page.png)
+
+### Manage Expenses Page
+
+![Manage expenses page](./pictures/05-manage-expenses-page.png)
+
+### Categories and Budgets Page
+
+![Categories and budgets page](./pictures/06-categories-budgets-page.png)
+
+### Recurring Expenses Page
+
+Screenshot not added yet.
+
+### Date-wise Report Page
+
+![Date-wise report page](./pictures/08-date-report-page.png)
+
+### Month-wise Report Page
+
+![Month-wise report page](./pictures/09-month-report-page.png)
+
+### Year-wise Report Page
+
+![Year-wise report page](./pictures/10-year-report-page.png)
+
+### Profile Page
+
+![Profile page](./pictures/11-profile-page.png)
