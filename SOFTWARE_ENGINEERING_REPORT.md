@@ -1,4 +1,4 @@
-# Expense Tracker System
+﻿# Expense Tracker System
 
 ## Home
 
@@ -326,41 +326,58 @@ The repository does not show an implemented CI/CD pipeline. There are no visible
 
 ## System Screenshots
 
-### Figure 1. User Registration Page
+### Figure 1. Login Page
+This screen allows an existing user to enter an email address and password in order to access the system.
+
+![Figure 1. Login Page](report/pictures/01-login-page.png)
+
+### Figure 2. User Registration Page
 This screen allows a new user to create an account by entering full name, email address, mobile number, password, and repeated password. It is the entry point for new users who want to access the expense tracking features of the system.
 
-### Figure 2. Dashboard Page
-The dashboard gives a summarized overview of user spending. It presents key metrics such as today’s expenses, last 7 days, current month, and total expense. It also includes charts and quick statistics to help the user understand spending behavior visually.
+![Figure 2. User Registration Page](report/pictures/02-registration-page.png)
 
-### Figure 3. Add Expense Page
+### Figure 3. Dashboard Page
+The dashboard gives a summarized overview of user spending. It presents key metrics such as today's expenses, last 7 days, current month, and total expense. It also includes charts and quick statistics to help the user understand spending behavior visually.
+
+![Figure 3. Dashboard Page](report/pictures/03-dashboard-page.png)
+
+### Figure 4. Add Expense Page
 This page is used to record a new expense. The user can select the date, currency, item, category, cost, notes, and upload a receipt file. It is one of the core input pages of the application.
 
-### Figure 4. Manage Expenses Page
+![Figure 4. Add Expense Page](report/pictures/04-add-expense-page.png)
+
+### Figure 5. Manage Expenses Page
 This screen displays stored expense records in tabular form. It supports searching, filtering, exporting to CSV, editing, and deleting expense entries. This page is important for reviewing and controlling previously entered data.
 
-### Figure 5. Categories and Budgets Page
+![Figure 5. Manage Expenses Page](report/pictures/05-manage-expenses-page.png)
+
+### Figure 6. Categories and Budgets Page
 This page allows the user to create categories and assign monthly budgets. It also displays category performance by comparing spent amounts against budgeted amounts. This supports financial planning and budget control.
 
-### Figure 6. Daily Report Page
+![Figure 6. Categories and Budgets Page](report/pictures/06-categories-budgets-page.png)
+
+### Figure 7. Daily Report Page
 This page presents analytical output for a selected date range. It includes total expense, number of active spending days, highest spending day, and graphical charts. It helps the user analyze short-term spending trends.
 
-### Figure 7. Recurring Expenses Page
-This page is used to define repeated expenses such as subscriptions or monthly bills. The user can choose item, amount, category, frequency, and start date. The system then automatically adds expenses when the due date arrives.
+![Figure 7. Daily Report Page](report/pictures/08-date-report-page.png)
 
-### Figure 8. User Profile Page
+### Figure 8. Monthly Report Page
+This page summarizes expenses by month and helps the user compare spending across longer time periods.
+
+![Figure 8. Monthly Report Page](report/pictures/09-month-report-page.png)
+
+### Figure 9. Yearly Report Page
+This page provides yearly analysis so the user can review long-term spending patterns across multiple years.
+
+![Figure 9. Yearly Report Page](report/pictures/10-year-report-page.png)
+
+### Figure 10. User Profile Page
 This page stores and updates user information such as name, email, mobile number, default currency, and default category. It also provides a way to personalize system behavior according to user preferences.
 
-### Note for Final Submission
-The screenshots above should be inserted into the final university report as labeled figures. A suitable format is:
+![Figure 10. User Profile Page](report/pictures/11-profile-page.png)
 
-- Figure 1: User Registration Page
-- Figure 2: Dashboard Page
-- Figure 3: Add Expense Page
-- Figure 4: Manage Expenses Page
-- Figure 5: Categories and Budgets Page
-- Figure 6: Daily Report Page
-- Figure 7: Recurring Expenses Page
-- Figure 8: User Profile Page
+### Note for Final Submission
+The recurring expenses screenshot is still missing. Once you add that image, I can insert it here as an additional labeled figure.
 
 ## Developer Guide
 
