@@ -42,7 +42,7 @@ From a software engineering perspective, the project is suitable for academic pr
 
 ## Submission Notes
 
-The report site is already prepared for GitHub Pages deployment through the repository workflow. To complete the university submission, add your screenshots to [pictures](./pictures/) and your final exported diagrams to [diagrams](./diagrams/), then replace the author placeholder on this page.
+The report site is already prepared for GitHub Pages deployment through the repository workflow. To complete the university submission, add your screenshots to [pictures](./pictures/) and replace the author placeholder on this page.
 
 ## Conclusion
 
