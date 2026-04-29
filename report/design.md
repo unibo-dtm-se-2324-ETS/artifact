@@ -123,7 +123,7 @@ This chart reflects the main website navigation flow. After authentication, the 
 
 ## Database Design
 
-The main database tables identified from the codebase are:
+The main database tables used by the system are:
 
 ### `tbluser`
 

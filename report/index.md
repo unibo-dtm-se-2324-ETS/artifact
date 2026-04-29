@@ -23,7 +23,7 @@ The Expense Tracker System is a web-based personal finance management applicatio
 
 Compared with a basic expense log, this project adds practical analysis features such as dashboard summaries, chart-based visualizations, category-level monitoring, CSV export, and multi-currency support. The codebase also demonstrates a gradual move toward reusable helper functions, prepared statements, CSRF protection, and more structured page design.
 
-From a software engineering perspective, the project is suitable for academic presentation because it addresses a clear real-world problem, includes several connected modules, uses a relational database, and shows both strengths and areas for improvement.
+From a software engineering perspective, the project addresses a clear real-world problem, includes several connected modules, uses a relational database, and shows both strengths and areas for improvement.
 
 ## Report Map
 
@@ -40,10 +40,6 @@ From a software engineering perspective, the project is suitable for academic pr
 - [Self-evaluation](./self-evaluation)
 - [Future Work](./future-work)
 
-## Submission Notes
-
-The report site is already prepared for GitHub Pages deployment through the repository workflow. To complete the university submission, add your screenshots to [pictures](./pictures/) and your final exported diagrams to [diagrams](./diagrams/), then replace the author placeholder on this page.
-
 ## Conclusion
 
-The Expense Tracker System is a strong student software engineering project because it combines authentication, expense CRUD operations, budgeting, recurring scheduling, reporting, and dashboard analytics in one practical application. It goes beyond a simple data-entry system and demonstrates how software design, database structure, user workflows, and maintainability concerns come together in a real project.
+The Expense Tracker System combines authentication, expense CRUD operations, budgeting, recurring scheduling, reporting, and dashboard analytics in one practical application. It goes beyond a simple data-entry system and demonstrates how software design, database structure, user workflows, and maintainability concerns come together in a real project.

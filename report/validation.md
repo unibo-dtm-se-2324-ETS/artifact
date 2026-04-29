@@ -26,7 +26,7 @@ The repository does not include a full automated test suite for application beha
 
 ## Validation Results
 
-Based on inspection of the codebase and implemented pages, the system supports the main workflow successfully:
+The implemented pages support the main workflow successfully:
 
 - User authentication features are present.
 - Expense CRUD operations are implemented.

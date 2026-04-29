@@ -27,4 +27,4 @@ The application is designed for deployment on a local Apache and MySQL environme
 
 ## Local Use Case
 
-This deployment model is well suited for academic demonstration, lab presentation, and personal portfolio use because it requires only a local PHP and MySQL setup.
+This deployment model is suitable for demonstration, lab presentation, and personal portfolio use because it requires only a local PHP and MySQL setup.

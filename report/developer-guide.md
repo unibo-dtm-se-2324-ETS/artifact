@@ -16,7 +16,7 @@ nav_order: 11
 - `uploads/receipts/`
   Stores uploaded receipt files.
 - `report/`
-  Contains the university report site for GitHub Pages.
+  Contains the project report site for GitHub Pages.
 
 ## Important Files
 

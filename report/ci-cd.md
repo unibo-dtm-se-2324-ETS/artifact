@@ -7,7 +7,7 @@ nav_order: 9
 
 ## Current Status
 
-Unlike the older standalone report draft, this repository does include GitHub Actions workflows. The visible workflows support packaging and report-site publishing, and there is also a PHP Composer workflow template.
+The repository includes GitHub Actions workflows for packaging and report-site publishing, along with a PHP Composer workflow file.
 
 ## Workflows Present in the Repository
 
@@ -20,7 +20,7 @@ Unlike the older standalone report draft, this repository does include GitHub Ac
 
 ## Assessment
 
-The project has the beginnings of a CI/CD setup, especially for packaging and documentation publishing. However, the application pipeline is not yet fully aligned with the current codebase because:
+The project has an initial CI/CD setup for packaging and documentation publishing. However, the application pipeline is not yet fully aligned with the current codebase because:
 
 - there is no automated test suite for the PHP application,
 - there is no Composer project file in the repository,

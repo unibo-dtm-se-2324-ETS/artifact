@@ -26,50 +26,18 @@ nav_order: 10
 - Historical analysis through reports
 - Exportable records for further processing
 
-## Screenshots
+## Main Screens
 
-The following screenshots show the main pages of the system used in this project:
+The main pages of the system are:
 
-### Login Page
-
-![Login page](./pictures/01-login-page.png)
-
-### Registration Page
-
-![Registration page](./pictures/02-registration-page.png)
-
-### Dashboard Page
-
-![Dashboard page](./pictures/03-dashboard-page.png)
-
-### Add Expense Page
-
-![Add expense page](./pictures/04-add-expense-page.png)
-
-### Manage Expenses Page
-
-![Manage expenses page](./pictures/05-manage-expenses-page.png)
-
-### Categories and Budgets Page
-
-![Categories and budgets page](./pictures/06-categories-budgets-page.png)
-
-### Recurring Expenses Page
-
-![Recurring expenses page](./pictures/07-recurring-expenses-page.png)
-
-### Date-wise Report Page
-
-![Date-wise report page](./pictures/08-date-report-page.png)
-
-### Month-wise Report Page
-
-![Month-wise report page](./pictures/09-month-report-page.png)
-
-### Year-wise Report Page
-
-![Year-wise report page](./pictures/10-year-report-page.png)
-
-### Profile Page
-
-![Profile page](./pictures/11-profile-page.png)
+- Login page
+- Registration page
+- Dashboard page
+- Add expense page
+- Manage expenses page
+- Categories and budgets page
+- Recurring expenses page
+- Date-wise report page
+- Month-wise report page
+- Year-wise report page
+- Profile page

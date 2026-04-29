@@ -6,7 +6,7 @@
 Expense Tracker System
 
 ### Author
-[Student Name]
+Zagros Baban
 
 ### Abstract
 The Expense Tracker System is a web-based personal finance management application developed using PHP, MySQL, HTML, CSS, JavaScript, Bootstrap, and Chart.js. The system allows registered users to record daily expenses, organize them by category, attach receipts, define monthly budgets, and generate analytical reports. In addition to basic expense entry, the project supports multi-currency tracking, recurring expenses, category-level budget monitoring, and dashboard-based visual summaries. The main purpose of the system is to help users monitor their spending habits and make better financial decisions through structured data collection and reporting. The project follows a practical modular structure in which the user interface, database access, helper functions, and reporting logic are separated into different files. This improves maintainability and makes the system easier to extend. Overall, the system demonstrates the application of software engineering principles to the design and implementation of a useful real-world financial management solution.
@@ -188,7 +188,7 @@ The system produces outputs in the form of:
 ## Development
 
 ### Development Approach
-Based on the code structure, the project appears to have been developed incrementally. The older pages use straightforward PHP and SQL mixed inside view files, while the newer pages introduce helper functions, prepared statements, CSRF handling, better validation, modernized layout styling, and more modular logic. This suggests progressive enhancement rather than a full rewrite.
+The project was developed incrementally. The first version used straightforward PHP and SQL mixed inside view files, while later improvements introduced helper functions, prepared statements, CSRF handling, better validation, modernized layout styling, and more modular logic. This approach allowed the system to grow in stages while keeping existing features working.
 
 ### Tools and Technologies Used
 - PHP for server-side programming
@@ -237,7 +237,7 @@ The project does not include automated unit or integration tests in the reposito
 | Export CSV | Click export | Data downloads in CSV format |
 
 ### Validation Results
-From inspection of the code, the project supports the complete main workflow successfully:
+The project supports the complete main workflow successfully:
 - User authentication is available.
 - Expense CRUD operations are implemented.
 - Filters and CSV export are implemented.
@@ -255,7 +255,7 @@ The project shows practical functionality, but validation also reveals areas for
 ## Release
 
 ### Release Description
-The current version can be considered a functional academic prototype or local production-ready student project. It offers a complete personal expense tracking workflow from account creation to analytical reporting.
+The current version provides a complete local-deployment version of the Expense Tracker System. It offers a full personal expense tracking workflow from account creation to analytical reporting.
 
 ### Release Features
 - Secure session-based access to internal pages
@@ -286,22 +286,30 @@ Some additional tables and columns are created automatically by helper functions
 ## CI/CD
 
 ### Current Status
-The repository does not show an implemented CI/CD pipeline. There are no visible GitHub Actions, GitLab CI files, or automated deployment scripts in the project.
+The repository includes GitHub Actions workflows for packaging and report-site publishing, along with a PHP Composer workflow file.
 
-### Recommended CI/CD Improvements
-- Add version control workflows for pull request checks
-- Run PHP linting automatically
-- Add static analysis for PHP code quality
-- Execute automated tests before merge
-- Package deployment steps into repeatable scripts
-- Use environment-specific configuration for production deployment
+### Workflows Present in the Repository
+- `artifact.yml`
+  Builds a zipped release artifact from the repository contents.
+- `report-site.yml`
+  Builds the `report/` folder with Jekyll and deploys it to GitHub Pages.
+- `php.yml`
+  Validates and installs Composer dependencies in CI, although the current repository does not yet include `composer.json` or `composer.lock`.
 
-### Suggested CI/CD Pipeline
-1. Developer pushes code to repository.
-2. CI server runs syntax checks and automated tests.
-3. Build artifacts are prepared.
-4. Deployment is triggered to staging or production.
-5. Smoke tests verify successful release.
+### Assessment
+The project has an initial CI/CD setup for packaging and documentation publishing. However, the application pipeline is not yet fully aligned with the current codebase because:
+
+- there is no automated test suite for the PHP application,
+- there is no Composer project file in the repository,
+- there is no database migration or seed step in CI,
+- there are no smoke tests for deployed behavior.
+
+### Recommended Improvements
+- Add a real PHP linting and syntax-check workflow for all application files.
+- Add unit and integration tests for important business flows.
+- Add database setup scripts for CI validation.
+- Introduce environment-based configuration for production use.
+- Keep GitHub Pages deployment for documentation and final report publishing.
 
 ## User Guide
 
@@ -324,62 +332,40 @@ The repository does not show an implemented CI/CD pipeline. There are no visible
 - Historical analysis
 - Exportable records
 
-## System Screenshots
+## System Screens
 
 ### Figure 1. Login Page
 This screen allows an existing user to enter an email address and password in order to access the system.
 
-![Figure 1. Login Page](report/pictures/01-login-page.png)
-
 ### Figure 2. User Registration Page
 This screen allows a new user to create an account by entering full name, email address, mobile number, password, and repeated password. It is the entry point for new users who want to access the expense tracking features of the system.
-
-![Figure 2. User Registration Page](report/pictures/02-registration-page.png)
 
 ### Figure 3. Dashboard Page
 The dashboard gives a summarized overview of user spending. It presents key metrics such as today's expenses, last 7 days, current month, and total expense. It also includes charts and quick statistics to help the user understand spending behavior visually.
 
-![Figure 3. Dashboard Page](report/pictures/03-dashboard-page.png)
-
 ### Figure 4. Add Expense Page
 This page is used to record a new expense. The user can select the date, currency, item, category, cost, notes, and upload a receipt file. It is one of the core input pages of the application.
-
-![Figure 4. Add Expense Page](report/pictures/04-add-expense-page.png)
 
 ### Figure 5. Manage Expenses Page
 This screen displays stored expense records in tabular form. It supports searching, filtering, exporting to CSV, editing, and deleting expense entries. This page is important for reviewing and controlling previously entered data.
 
-![Figure 5. Manage Expenses Page](report/pictures/05-manage-expenses-page.png)
-
 ### Figure 6. Categories and Budgets Page
 This page allows the user to create categories and assign monthly budgets. It also displays category performance by comparing spent amounts against budgeted amounts. This supports financial planning and budget control.
-
-![Figure 6. Categories and Budgets Page](report/pictures/06-categories-budgets-page.png)
 
 ### Figure 7. Daily Report Page
 This page presents analytical output for a selected date range. It includes total expense, number of active spending days, highest spending day, and graphical charts. It helps the user analyze short-term spending trends.
 
-![Figure 7. Daily Report Page](report/pictures/08-date-report-page.png)
-
 ### Figure 8. Monthly Report Page
 This page summarizes expenses by month and helps the user compare spending across longer time periods.
-
-![Figure 8. Monthly Report Page](report/pictures/09-month-report-page.png)
 
 ### Figure 9. Yearly Report Page
 This page provides yearly analysis so the user can review long-term spending patterns across multiple years.
 
-![Figure 9. Yearly Report Page](report/pictures/10-year-report-page.png)
-
 ### Figure 10. Recurring Expenses Page
 This page is used to define repeated expenses such as subscriptions or monthly bills. The user can choose item, amount, category, frequency, and start date. The system then automatically adds expenses when the due date arrives.
 
-![Figure 10. Recurring Expenses Page](report/pictures/07-recurring-expenses-page.png)
-
 ### Figure 11. User Profile Page
 This page stores and updates user information such as name, email, mobile number, default currency, and default category. It also provides a way to personalize system behavior according to user preferences.
-
-![Figure 11. User Profile Page](report/pictures/11-profile-page.png)
 
 ## Developer Guide
 
@@ -449,4 +435,4 @@ This project demonstrates that software engineering is not only about making fea
 - Build a REST API or mobile app version in the future.
 
 ## Conclusion
-The Expense Tracker System is a strong university software engineering project because it addresses a practical problem and delivers a complete web-based solution with several useful modules. The system goes beyond basic data entry by including reporting, budgeting, recurring expenses, receipt management, and visual analytics. From a software engineering perspective, the project demonstrates requirements handling, modular design, database modeling, user-centered functionality, and iterative improvement. At the same time, it reveals valuable improvement opportunities in security, testing, and deployment automation. Overall, the project is functional, relevant, and suitable as an academic case study in web application engineering.
+The Expense Tracker System addresses a practical problem and delivers a complete web-based solution with several useful modules. The system goes beyond basic data entry by including reporting, budgeting, recurring expenses, receipt management, and visual analytics. From a software engineering perspective, the project demonstrates requirements handling, modular design, database modeling, user-centered functionality, and iterative improvement. At the same time, it reveals valuable improvement opportunities in security, testing, and deployment automation. Overall, the project is functional, relevant, and suitable for web application engineering documentation.

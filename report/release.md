@@ -7,7 +7,7 @@ nav_order: 7
 
 ## Release Description
 
-The current project state can be considered a functional academic prototype and a strong local-deployment student project. It provides a complete user flow from account creation to expense analysis and reporting.
+The current project state provides a complete local-deployment version of the Expense Tracker System. It supports the full user flow from account creation to expense analysis and reporting.
 
 ## Main Release Features
 
@@ -24,4 +24,4 @@ The current project state can be considered a functional academic prototype and 
 
 ## Release Readiness Notes
 
-The application is ready for demonstration and university submission use. For production-grade release quality, the project would still benefit from stronger password hashing, fuller prepared-statement coverage, and a formal migration strategy.
+The application is ready for demonstration and local use. For production-grade release quality, the project would still benefit from stronger password hashing, fuller prepared-statement coverage, and a formal migration strategy.

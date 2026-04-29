@@ -15,7 +15,3 @@ nav_order: 13
 - Improve password recovery with secure email-based flows.
 - Add role-based administration if the system grows beyond single-user use.
 - Consider a REST API or mobile version in a future phase.
-
-## Closing Remark
-
-The current version already provides a solid academic case study, and these future improvements would move it closer to production-level quality.

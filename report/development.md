@@ -7,7 +7,7 @@ nav_order: 5
 
 ## Development Approach
 
-The codebase suggests an incremental development process. Older pages use straightforward procedural PHP mixed with SQL and HTML, while newer pages introduce reusable helpers, prepared statements, runtime schema checks, CSRF tokens, and cleaner page layouts. This shows that the system was extended in stages rather than rewritten all at once.
+The project was developed through an incremental process. The first version used straightforward procedural PHP mixed with SQL and HTML, while later improvements introduced reusable helpers, prepared statements, runtime schema checks, CSRF tokens, and cleaner page layouts. This approach allowed the system to grow in stages while keeping the existing features working.
 
 ## Technologies Used
 
@@ -56,4 +56,4 @@ The helper file `includes/expense-helpers.php` centralizes reusable logic such a
 
 ## Engineering Observations
 
-The project demonstrates practical software evolution. It already contains useful abstractions and clearer feature separation than a basic student CRUD project, but it also preserves some procedural patterns that can still be improved in future iterations.
+The project demonstrates practical software evolution. It contains useful abstractions and clear feature separation, while some procedural patterns remain as areas for future improvement.

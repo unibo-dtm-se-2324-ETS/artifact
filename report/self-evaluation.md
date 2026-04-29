@@ -9,7 +9,7 @@ nav_order: 12
 
 - The project solves a practical real-world problem.
 - It includes more than simple CRUD by supporting budgets, recurring expenses, receipt uploads, multi-currency tracking, and analytical dashboards.
-- The reporting features add academic value because they demonstrate useful data processing and output generation.
+- The reporting features demonstrate useful data processing and output generation.
 - Shared helper functions improve reuse and maintainability in newer modules.
 - CSV export increases the practical usefulness of the system.
 
@@ -24,4 +24,4 @@ nav_order: 12
 
 ## Lessons Learned
 
-This project shows that software engineering is not only about making features work. It also involves structuring the codebase, designing database relationships, validating user input, planning for maintainability, and documenting trade-offs. The system is a useful example of how a student project can grow from a basic CRUD idea into a richer application with reporting and automation features.
+This project shows that software engineering is not only about making features work. It also involves structuring the codebase, designing database relationships, validating user input, planning for maintainability, and documenting trade-offs. The system grew from a basic CRUD idea into a richer application with reporting and automation features.
