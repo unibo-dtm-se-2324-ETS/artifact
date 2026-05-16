@@ -7,12 +7,13 @@ nav_order: 6
 
 ## Testing Approach
 
-The project was checked in two ways:
+The project was checked in three ways:
 
 1. Code-level checks were used to verify that the PHP files do not contain syntax errors.
-2. Manual browser testing was used to verify that the website workflows behave correctly from the user's point of view.
+2. PHPUnit automated tests were used to verify reusable PHP helper functions.
+3. Manual browser testing was used to verify that the website workflows behave correctly from the user's point of view.
 
-The repository does not include a full automated unit or integration test suite for application behavior, so functional validation is mainly manual. Even so, the manual testing was structured around the most important user workflows and output checks.
+The repository now includes automated unit tests for helper logic. Full end-to-end application validation is still mainly manual because the project is a PHP/MySQL web application that depends on a local XAMPP database and browser interaction.
 
 ## Code Checks
 
@@ -38,6 +39,34 @@ Result:
 - No syntax errors were detected in the root PHP application pages.
 - No syntax errors were detected in the PHP files inside `includes/`.
 - The same type of syntax check is automated in GitHub Actions through the `PHP Syntax Check` workflow.
+
+## Automated Unit Tests
+
+PHPUnit was added as a development dependency and used to test reusable helper functions from:
+
+- `includes/expense-helpers.php`
+- `includes/report-helpers.php`
+
+The test files are stored in:
+
+- `tests/unit/ExpenseHelpersTest.php`
+- `tests/unit/ReportHelpersTest.php`
+
+Command used:
+
+```powershell
+composer test
+```
+
+Result:
+
+```text
+PHPUnit 11.5.55
+13 tests, 24 assertions
+OK
+```
+
+The automated tests check currency options, currency formatting, money formatting, HTML escaping, month-key generation, selected-currency validation, budget progress calculation, CSRF token verification, and report helper behavior.
 
 ## Manual Website Testing Procedure
 

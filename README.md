@@ -42,6 +42,12 @@ Locally, selected syntax checks can be run with:
 composer run lint
 ```
 
+Automated unit tests can be run with:
+
+```bash
+composer test
+```
+
 ## License
 
 This project is released under the MIT License.
