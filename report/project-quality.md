@@ -17,7 +17,7 @@ This chapter maps the project against the software engineering assessment criter
 | Dependencies | Satisfied for the current scope | `composer.json` specifies PHP as a runtime dependency and provides a lint script. No external PHP packages are currently required. |
 | Licensing | Satisfied | The repository includes an MIT `LICENSE`, and the motivation is documented below. |
 | API | Not applicable | The system is a server-rendered PHP application and does not expose a public Web API. |
-| Testing | Partially satisfied | PHPUnit unit tests are included for helper logic, and manual acceptance tests are documented. Coverage measurement is future work. |
+| Testing | Partially satisfied | PHPUnit unit tests and syntax smoke tests are included, and manual acceptance tests are documented. Coverage measurement is future work. |
 | Build | Satisfied | GitHub Actions run PHP syntax checks, and Composer provides a local lint command. |
 | Deploy | Partially satisfied | Local XAMPP deployment and GitHub Pages report deployment are documented. Application package publishing to a language package repository is not applicable for this educational PHP web app. |
 | DevOps | Partially satisfied | CI/CD exists for syntax checks, artifact packaging, and report deployment. Automated behavioral testing is not yet included. |
@@ -77,7 +77,7 @@ The current system is a server-rendered PHP web application and does not provide
 
 ## Testing
 
-The project includes PHPUnit unit tests for reusable helper logic in `includes/expense-helpers.php` and `includes/report-helpers.php`. The automated test suite can be run with:
+The project includes PHPUnit tests for reusable helper logic in `includes/expense-helpers.php` and `includes/report-helpers.php`. It also includes a syntax smoke test that checks the main PHP pages and PHP include files. The automated test suite can be run with:
 
 ```bash
 composer test
@@ -86,7 +86,7 @@ composer test
 Current automated test result:
 
 ```text
-13 tests, 24 assertions, OK
+44 tests, 57 assertions, OK
 ```
 
 An acceptance checklist is also included in `tests/acceptance-checklist.md` and maps important requirements to manual browser testing procedures. The Validation chapter reports the current validation results and quality observations.

@@ -10,7 +10,7 @@ nav_order: 6
 The project was checked in three ways:
 
 1. Code-level checks were used to verify that the PHP files do not contain syntax errors.
-2. PHPUnit automated tests were used to verify reusable PHP helper functions.
+2. PHPUnit automated tests were used to verify reusable PHP helper functions and syntax-check all PHP pages.
 3. Manual browser testing was used to verify that the website workflows behave correctly from the user's point of view.
 
 The repository now includes automated unit tests for helper logic. Full end-to-end application validation is still mainly manual because the project is a PHP/MySQL web application that depends on a local XAMPP database and browser interaction.
@@ -47,10 +47,13 @@ PHPUnit was added as a development dependency and used to test reusable helper f
 - `includes/expense-helpers.php`
 - `includes/report-helpers.php`
 
+It also includes a syntax smoke test that runs PHP's `-l` checker against all root PHP pages and all PHP files in `includes/`.
+
 The test files are stored in:
 
 - `tests/unit/ExpenseHelpersTest.php`
 - `tests/unit/ReportHelpersTest.php`
+- `tests/unit/SyntaxCheckTest.php`
 
 Command used:
 
@@ -62,11 +65,11 @@ Result:
 
 ```text
 PHPUnit 11.5.55
-13 tests, 24 assertions
+44 tests, 57 assertions
 OK
 ```
 
-The automated tests check currency options, currency formatting, money formatting, HTML escaping, month-key generation, selected-currency validation, budget progress calculation, CSRF token verification, and report helper behavior.
+The automated tests check currency options, currency formatting, money formatting, HTML escaping, month-key generation, selected-currency validation, budget progress calculation, CSRF token verification, receipt upload validation, receipt deletion, report helper behavior, and PHP syntax validity for application pages.
 
 ## Manual Website Testing Procedure
 
@@ -133,11 +136,10 @@ The implemented pages support the main workflow successfully:
 - CSRF protection is present in several newer forms.
 - Password storage still uses MD5 in older authentication logic, which is not secure by modern standards.
 - Schema updates are triggered at runtime through helper logic instead of a dedicated migration system.
-- Automated application tests are not yet included.
+- Automated unit and syntax-smoke tests are included; browser-level automation is not yet included.
 
 ## Suggested Validation Improvements
 
-- Add a repeatable test checklist for all main workflows.
-- Introduce unit tests for helper functions.
+- Add browser-level automation with Playwright or Selenium.
 - Add integration tests for login, expense creation, recurring processing, and report generation.
 - Add security-focused validation for authentication and file uploads.

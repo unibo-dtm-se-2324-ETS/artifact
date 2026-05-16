@@ -69,4 +69,46 @@ final class ExpenseHelpersTest extends TestCase
         $this->assertTrue(expense_verify_csrf($token));
         $this->assertFalse(expense_verify_csrf('wrong-token'));
     }
+
+    public function testReceiptUploadReturnsEmptyResultWhenNoFileWasUploaded(): void
+    {
+        $result = expense_handle_receipt_upload(
+            array('error' => UPLOAD_ERR_NO_FILE),
+            1
+        );
+
+        $this->assertSame(array('path' => '', 'error' => ''), $result);
+    }
+
+    public function testReceiptUploadRejectsUnsupportedFileExtension(): void
+    {
+        $result = expense_handle_receipt_upload(
+            array(
+                'error' => UPLOAD_ERR_OK,
+                'name' => 'receipt.exe',
+                'tmp_name' => __FILE__,
+            ),
+            1
+        );
+
+        $this->assertSame('', $result['path']);
+        $this->assertSame('Receipt must be a JPG, PNG, or PDF file.', $result['error']);
+    }
+
+    public function testDeleteReceiptFileRemovesExistingReceipt(): void
+    {
+        $receiptDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts';
+        if (!is_dir($receiptDir)) {
+            mkdir($receiptDir, 0777, true);
+        }
+
+        $receiptPath = $receiptDir . DIRECTORY_SEPARATOR . 'unit-test-receipt.txt';
+        file_put_contents($receiptPath, 'temporary test receipt');
+
+        $this->assertFileExists($receiptPath);
+
+        expense_delete_receipt_file('uploads/receipts/unit-test-receipt.txt');
+
+        $this->assertFileDoesNotExist($receiptPath);
+    }
 }
