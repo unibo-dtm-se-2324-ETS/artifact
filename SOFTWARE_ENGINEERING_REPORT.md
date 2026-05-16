@@ -289,12 +289,14 @@ Some additional tables and columns are created automatically by helper functions
 The repository includes GitHub Actions workflows for packaging and report-site publishing, along with a PHP Composer workflow file.
 
 ### Workflows Present in the Repository
+- `main.yml`
+  Runs PHP syntax checks on application files.
 - `artifact.yml`
   Builds a zipped release artifact from the repository contents.
 - `report-site.yml`
   Builds the `report/` folder with Jekyll and deploys it to GitHub Pages.
 - `php.yml`
-  Validates and installs Composer dependencies in CI, although the current repository does not yet include `composer.json` or `composer.lock`.
+  Validates Composer configuration and installs Composer dependencies in CI. The project currently defines `composer.json`, while `composer.lock` is generated only after dependency installation.
 
 ### Assessment
 The project has an initial CI/CD setup for packaging and documentation publishing. However, the application pipeline is not yet fully aligned with the current codebase because:
@@ -433,6 +435,86 @@ This project demonstrates that software engineering is not only about making fea
 - Support PDF report export in addition to CSV.
 - Add email-based password recovery.
 - Build a REST API or mobile app version in the future.
+
+## Project Quality
+
+### DVCS
+The project uses Git for version control and is structured for publication on GitHub. The repository includes both the source code and the report pages, so the implementation and documentation can evolve together.
+
+Recommended repository conventions:
+- Use Conventional Commits, such as `feat: add recurring expense page` or `fix: validate receipt uploads`.
+- Keep each commit focused on one coherent change.
+- Use `main` for stable work and short-lived feature branches for new changes.
+
+### Versioning
+The current application does not expose a public Web API, so OpenAPI or Swagger versioning is not required. Application routes are page-based PHP routes rather than versioned API routes.
+
+Releases should follow Semantic Versioning:
+- `MAJOR` for incompatible changes
+- `MINOR` for new backward-compatible features
+- `PATCH` for bug fixes and small improvements
+
+The release artifact workflow can package a versioned release zip when a stable version is prepared.
+
+### Project Structure
+The repository contains the main PHP application files, shared helpers, frontend assets, upload storage, database scripts, report pages, and GitHub Actions workflows.
+
+- Main application pages are stored as root PHP files.
+- Shared code is stored in `includes/`.
+- Frontend resources are stored in `css/`, `js/`, `assets/`, and `fonts/`.
+- Uploaded receipts are stored in `uploads/receipts/`.
+- Report documentation is stored in `report/`.
+- Acceptance testing documentation is stored in `tests/`.
+- Project dependencies and scripts are described in `composer.json`.
+
+The structure is suitable for a small PHP project, although a larger production system could separate source files into a dedicated `src/` directory and automated tests into a full test suite.
+
+### Licensing
+The project includes an MIT License. This license was selected because it is simple, widely used, and suitable for educational and open-source projects. It allows reuse, modification, and distribution while keeping the copyright notice and license terms with the project.
+
+### API
+The current system is a server-rendered PHP web application and does not provide a separate public Web API. User actions are handled through web pages and form submissions. If a REST API is added in the future, it should be documented with OpenAPI and versioned from the first public release.
+
+### Testing
+The project currently relies mainly on manual validation. An acceptance checklist is included in `tests/acceptance-checklist.md` and maps important requirements to manual testing procedures.
+
+Automated unit and integration tests are not yet implemented, so automated coverage is not available. Future testing work should introduce PHPUnit or a similar PHP testing framework, then report coverage results for helper functions, authentication flows, expense management, reporting, and recurring expense logic.
+
+### Build
+The repository includes a GitHub Actions workflow for PHP syntax checking. This provides an automatic build-quality check for PHP files on push and pull request events.
+
+### Deploy
+The application is deployed locally through XAMPP by copying the project into `htdocs`, importing the database, and opening the project through `localhost`. The report site can be published through GitHub Pages using the repository workflow.
+
+### DevOps
+The repository includes GitHub Actions workflows for:
+- PHP syntax checking
+- release artifact packaging
+- report site publishing
+
+The next improvements would be automated test execution, database setup in CI, and deployment checks for the application itself.
+
+### Domain-Driven Design
+The main domain is personal expense management. The bounded context includes expenses, categories, budgets, recurring schedules, reports, and user preferences.
+
+Important domain concepts include:
+- User
+- Expense
+- Expense item
+- Category
+- Budget
+- Recurring expense
+- Report
+
+The current implementation is procedural PHP with helper functions rather than a formal DDD or hexagonal architecture. However, the domain concepts are clear and can be refactored into entities, repositories, and services in a future version.
+
+### Modelling
+The report includes architecture, navigation, database, and relationship diagrams in text form. These models describe the main system structure and data relationships. Future work could add UML class diagrams, sequence diagrams, state diagrams, and data-flow diagrams as exported image files in `report/diagrams/`.
+
+### Requirements
+Functional and non-functional requirements are documented in the Requirements chapter. User workflows are described in the User Guide and acceptance procedures are listed in `tests/acceptance-checklist.md`.
+
+The definition of done for each core requirement is that the related page or function works correctly, stores or retrieves the expected data, validates user input, and passes the acceptance procedure defined for that requirement.
 
 ## Conclusion
 The Expense Tracker System addresses a practical problem and delivers a complete web-based solution with several useful modules. The system goes beyond basic data entry by including reporting, budgeting, recurring expenses, receipt management, and visual analytics. From a software engineering perspective, the project demonstrates requirements handling, modular design, database modeling, user-centered functionality, and iterative improvement. At the same time, it reveals valuable improvement opportunities in security, testing, and deployment automation. Overall, the project is functional, relevant, and suitable for web application engineering documentation.

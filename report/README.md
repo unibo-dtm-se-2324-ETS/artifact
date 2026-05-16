@@ -7,11 +7,12 @@ This folder contains the GitHub Pages report site for the Expense Tracker System
 - `_config.yml` configures the Jekyll site.
 - `index.md` is the report home page.
 - Top-level `*.md` files contain the main report chapters used by the site sidebar.
-- pictures/ contains screenshots used by the report.
-- diagrams/ contains architecture, database, and use-case diagrams.
+- `project-quality.md` summarizes the project against the software engineering evaluation criteria.
+- `pictures/` is reserved for screenshots used by the report.
+- `diagrams/` is reserved for exported architecture, database, and use-case diagrams.
 
 ## Assets
 
-- Screenshots are stored in pictures/.
-- Exported diagrams are stored in diagrams/.
+- Screenshots can be stored in `pictures/`.
+- Exported diagrams can be stored in `diagrams/`.
 - The deployment URL is configured in `_config.yml`.

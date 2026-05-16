@@ -1,42 +1,27 @@
-diff --git a/c:\xampp\htdocs\Expense-Tracker-System\.github\workflows\artifact.yml b/c:\xampp\htdocs\Expense-Tracker-System\.github\workflows\artifact.yml
-new file mode 100644
---- /dev/null
-+++ b/c:\xampp\htdocs\Expense-Tracker-System\.github\workflows\artifact.yml
-@@ -0,0 +1,37 @@
-+name: Build Artifact
-+
-+on:
-+  push:
-+    branches:
-+      - main
-+  workflow_dispatch:
-+
-+jobs:
-+  package:
-+    runs-on: ubuntu-latest
-+
-+    steps:
-+      - name: Checkout code
-+        uses: actions/checkout@v5
-+
-+      - name: Create release folder
-+        run: |
-+          mkdir -p release
-+          rsync -av \
-+            --exclude='.git' \
-+            --exclude='.github' \
-+            --exclude='node_modules' \
-+            --exclude='vendor' \
-+            ./ release/
-+
-+      - name: Zip project
-+        run: |
-+          cd release
-+          zip -r ../expense-tracker.zip .
-+
-+      - name: Upload artifact
-+        uses: actions/upload-artifact@v4
-+        with:
-+          name: expense-tracker
-+          path: expense-tracker.zip
-+          retention-days: 7
+name: PHP Syntax Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+
+      - name: Check PHP syntax
+        run: |
+          find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l

@@ -204,6 +204,141 @@ tblcategories (1) -- (many) tblbudgets
 tblcategories (1) -- (many) tblrecurring
 ```
 
+## Domain Class Model
+
+```text
+User
+- id
+- fullName
+- email
+- defaultCurrency
+- defaultCategoryId
+
+Expense
+- id
+- userId
+- expenseDate
+- expenseItem
+- expenseCost
+- currency
+- categoryId
+- notes
+- receiptPath
+
+Category
+- id
+- userId
+- categoryName
+
+Budget
+- id
+- userId
+- categoryId
+- budgetMonth
+- currency
+- budgetAmount
+
+RecurringExpense
+- id
+- userId
+- expenseItem
+- expenseCost
+- frequency
+- nextRunDate
+- isActive
+```
+
+The class model is represented by the database-backed domain concepts used by the PHP pages. In the current implementation, these concepts are stored as relational tables rather than PHP entity classes.
+
+## Expense State Model
+
+```text
+Draft form input
+      |
+      v
+Validated expense
+      |
+      v
+Stored expense -----> Edited expense
+      |                    |
+      |                    v
+      +--------------> Stored expense
+      |
+      v
+Deleted expense
+```
+
+Recurring expenses have a related lifecycle:
+
+```text
+Created recurring rule
+      |
+      v
+Active recurring rule ---- due date reached ----> Generated expense
+      |
+      v
+Inactive recurring rule
+```
+
+## Main Sequence Flow
+
+```text
+User -> Browser: submit expense form
+Browser -> PHP page: POST expense data
+PHP page -> Helper functions: validate input and prepare values
+Helper functions -> Database: insert or update expense
+Database -> Helper functions: operation result
+Helper functions -> PHP page: success or error message
+PHP page -> Browser: redirect or render response
+```
+
+This sequence is representative of the add expense, edit expense, category, budget, and recurring-expense workflows.
+
+## Data-Flow Model
+
+```text
+User input
+   |
+   v
+PHP form handler
+   |
+   +--> Validation and formatting helpers
+   |
+   +--> MySQL database
+   |
+   +--> Dashboard, reports, tables, charts
+   |
+   +--> Optional CSV export
+```
+
+The main data flow starts with user-submitted forms, stores validated information in MySQL, and then reuses the stored records for summaries, report pages, charts, and exports.
+
+## Expense Creation Flow Chart
+
+```text
+Start
+  |
+  v
+Open add expense page
+  |
+  v
+Submit form
+  |
+  v
+Is input valid?
+  | yes
+  v
+Save expense in database
+  |
+  v
+Show success and updated list
+  |
+  v
+End
+
+If input is not valid, the page shows an error and asks the user to correct the form.
+```
+
 ## Input Design
 
 The system uses form-based input for registration, login, profile updates, expense creation, expense filtering, budget entry, recurring schedules, and report queries. Input controls include text boxes, password fields, date inputs, numeric fields, select menus, text areas, and file-upload controls.

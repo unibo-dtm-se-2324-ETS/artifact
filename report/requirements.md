@@ -23,6 +23,37 @@ nav_order: 3
 14. The system shall present chart-based insights for monthly spending and top categories.
 15. The system shall generate daily, monthly, and yearly expense reports.
 
+## User Stories
+
+| ID | User story | Related requirements |
+| --- | --- | --- |
+| US1 | As a new user, I want to create an account so that I can keep my expense data private and persistent. | FR1 |
+| US2 | As a registered user, I want to log in and log out so that only I can access my expenses. | FR2 |
+| US3 | As a user who forgot a password, I want to reset it so that I can recover access to my account. | FR3 |
+| US4 | As a user, I want to update my profile and default preferences so that expense forms are faster to complete. | FR4 |
+| US5 | As a user, I want to create reusable expense items so that repeated entries can be added consistently. | FR5 |
+| US6 | As a user, I want to add, edit, and delete expenses so that my spending records stay accurate. | FR6, FR7 |
+| US7 | As a user, I want to search, filter, and export expenses so that I can inspect or reuse selected data. | FR8, FR9 |
+| US8 | As a user, I want to define categories and monthly budgets so that I can compare real spending with planned spending. | FR10 |
+| US9 | As a user, I want to schedule recurring expenses so that predictable payments are not forgotten. | FR11, FR12 |
+| US10 | As a user, I want dashboard summaries and charts so that I can understand my spending quickly. | FR13, FR14 |
+| US11 | As a user, I want daily, monthly, and yearly reports so that I can analyze spending over different time periods. | FR15 |
+
+## Definition of Done
+
+| Requirement group | Definition of done |
+| --- | --- |
+| Account management | Registration, login, logout, password recovery, and password change pages validate input, update the database correctly, and protect private pages with sessions. |
+| Profile and defaults | Profile changes are saved for the logged-in user and reused by relevant expense forms. |
+| Expense items | Users can create and reuse item names without affecting other users' data. |
+| Expense CRUD | Users can add, edit, and delete expenses with valid date, item, amount, currency, category, notes, and optional receipt data. Invalid input is rejected or handled safely. |
+| Expense filtering and CSV export | Filters return only matching records, and CSV export includes the same filtered data in a downloadable file. |
+| Categories and budgets | Categories and budgets can be created per user, displayed in management pages, and reflected in dashboard budget status. |
+| Recurring expenses | Weekly and monthly recurring records can be created, stored, activated or deactivated, and converted into due expense entries. |
+| Dashboard and charts | Summary totals and charts load for the logged-in user and use that user's expense data. |
+| Reports | Date-wise, month-wise, and year-wise reports display correct totals, details, and charts for selected periods. |
+| Acceptance testing | Each requirement group has a corresponding manual acceptance procedure in `tests/acceptance-checklist.md`. |
+
 ## Non-Functional Requirements
 
 - Usability: The interface should be simple enough for ordinary users without technical knowledge.

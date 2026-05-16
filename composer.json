@@ -1,0 +1,13 @@
+{
+  "name": "zagros-baban/expense-tracker-system",
+  "description": "A PHP and MySQL web application for tracking personal expenses, budgets, recurring payments, and reports.",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.4"
+  },
+  "require-dev": {},
+  "scripts": {
+    "lint": "php -l add-expense.php && php -l dashboard.php && php -l manage-expense.php && php -l includes/expense-helpers.php && php -l includes/report-helpers.php"
+  }
+}

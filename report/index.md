@@ -39,6 +39,7 @@ From a software engineering perspective, the project addresses a clear real-worl
 - [Developer Guide](./developer-guide)
 - [Self-evaluation](./self-evaluation)
 - [Future Work](./future-work)
+- [Project Quality](./project-quality)
 
 ## Conclusion
 

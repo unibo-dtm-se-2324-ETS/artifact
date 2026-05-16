@@ -7,22 +7,85 @@ nav_order: 6
 
 ## Testing Approach
 
-The repository does not include a full automated test suite for application behavior, so validation is mainly manual. Even so, manual testing can be structured around the most important user workflows and output checks.
+The project was checked in two ways:
+
+1. Code-level checks were used to verify that the PHP files do not contain syntax errors.
+2. Manual browser testing was used to verify that the website workflows behave correctly from the user's point of view.
+
+The repository does not include a full automated unit or integration test suite for application behavior, so functional validation is mainly manual. Even so, the manual testing was structured around the most important user workflows and output checks.
+
+## Code Checks
+
+The PHP source code was checked with the PHP command-line syntax checker from the local XAMPP installation.
+
+Environment:
+
+- Operating system: Windows
+- Local server stack: XAMPP
+- PHP version used for checking: PHP 8.2.12
+- Database: MySQL/MariaDB through XAMPP
+
+Commands used:
+
+```powershell
+C:\xampp\php\php.exe -v
+Get-ChildItem -Filter *.php | ForEach-Object { C:\xampp\php\php.exe -l $_.FullName }
+Get-ChildItem includes -Filter *.php | ForEach-Object { C:\xampp\php\php.exe -l $_.FullName }
+```
+
+Result:
+
+- No syntax errors were detected in the root PHP application pages.
+- No syntax errors were detected in the PHP files inside `includes/`.
+- The same type of syntax check is automated in GitHub Actions through the `PHP Syntax Check` workflow.
+
+## Manual Website Testing Procedure
+
+The website was tested locally through XAMPP using the following procedure:
+
+1. Start Apache and MySQL in XAMPP.
+2. Place the project inside `htdocs`.
+3. Import the database script into MySQL.
+4. Open `http://localhost/Expense-Tracker-System/` in a browser.
+5. Test each main workflow as a normal user.
+6. Confirm the visible result in the browser and, where relevant, confirm that the data is stored or changed in the database.
 
 ## Sample Test Cases
 
-| Test Case | Input | Expected Result |
+| Test Case | Test Data / Action | Expected Result | Status |
+| --- | --- | --- | --- |
+| User registration | Enter valid full name, email, mobile number, and password. | New user account is created and can be used for login. | Passed manually |
+| Login | Enter correct email and password. | User is redirected to dashboard. | Passed manually |
+| Logout | Click logout from an authenticated session. | Session ends and protected pages require login again. | Passed manually |
+| Add expense | Enter valid date, item, category, amount, currency, and optional notes. | Expense is saved successfully and appears in the expense list. | Passed manually |
+| Edit expense | Change an existing expense amount or category. | Existing expense data is updated correctly. | Passed manually |
+| Delete expense | Delete an existing expense record. | Expense is removed from the list. | Passed manually |
+| Search and filter | Filter by text, date range, category, amount range, or currency. | Only matching expense records are displayed. | Passed manually |
+| Add category | Enter a unique category name. | Category is stored and appears in category selectors. | Passed manually |
+| Save budget | Select category, month, currency, and amount. | Budget appears in category and dashboard views. | Passed manually |
+| Add recurring expense | Create weekly or monthly recurring schedule. | Recurring rule is stored and due expenses can be generated. | Passed manually |
+| Generate report | Select date-wise, month-wise, or year-wise report period. | Report summary, details, and charts are displayed. | Passed manually |
+| Export CSV | Click export after filtering expenses. | CSV file downloads and contains the selected expense data. | Passed manually |
+
+## Requirement Acceptance Matrix
+
+| Requirement | Acceptance procedure | Final result |
 | --- | --- | --- |
-| User registration | Valid name, email, mobile number, password | New user account is created |
-| Login | Correct email and password | User is redirected to dashboard |
-| Add expense | Valid date, item, category, amount | Expense is saved successfully |
-| Edit expense | Updated amount or category | Existing expense data is updated |
-| Delete expense | Existing expense selected | Expense is removed from the list |
-| Add category | Unique category name | Category is stored successfully |
-| Save budget | Category, month, amount | Budget appears in category and dashboard views |
-| Add recurring expense | Weekly or monthly schedule | Future due expense is auto-generated |
-| Generate report | Valid date or month range | Report summary and charts are displayed |
-| Export CSV | Export action on filtered expenses | CSV file downloads correctly |
+| FR1 Register user | Submit the registration form with valid personal data and password. | User account is created. |
+| FR2 Login and logout | Log in with valid credentials, access dashboard, then log out. | Protected pages are available only during the session. |
+| FR3 Password workflows | Use forgot-password, reset-password, and change-password pages with valid data. | Password-related workflows complete without breaking login. |
+| FR4 Profile and defaults | Update profile data, default currency, and default category. | Updated values are stored and reused where applicable. |
+| FR5 Expense items | Add a reusable expense item. | Item appears as an available option for expenses. |
+| FR6 Add expense | Submit a complete valid expense form. | Expense is stored and displayed in the list/dashboard. |
+| FR7 Edit and delete expense | Modify an existing expense, then delete it. | Changes are saved, and deleted records no longer appear. |
+| FR8 Search and filter | Apply text, date, amount, category, and currency filters. | Results contain only matching expenses. |
+| FR9 CSV export | Export filtered expenses. | Downloaded CSV matches the filtered result set. |
+| FR10 Categories and budgets | Create categories and assign monthly budgets. | Categories and budget status are visible in relevant pages. |
+| FR11 Recurring rules | Create weekly and monthly recurring expenses. | Recurring rules are stored with the correct frequency. |
+| FR12 Automatic recurring generation | Open the application after a recurring item becomes due. | Due recurring expenses are inserted into the expense table. |
+| FR13 Dashboard summaries | Open dashboard with existing expense data. | Today, weekly, monthly, yearly, and total summaries are displayed. |
+| FR14 Charts | Open dashboard/report pages with categorized expenses. | Chart-based insights render with the expected data. |
+| FR15 Reports | Generate daily, monthly, and yearly reports. | Report totals, details, and charts match the selected period. |
 
 ## Validation Results
 

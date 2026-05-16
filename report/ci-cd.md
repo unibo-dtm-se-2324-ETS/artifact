@@ -11,12 +11,14 @@ The repository includes GitHub Actions workflows for packaging and report-site p
 
 ## Workflows Present in the Repository
 
+- `main.yml`
+  Runs PHP syntax checks on application files.
 - `artifact.yml`
   Builds a zipped release artifact from the repository contents.
 - `report-site.yml`
   Builds the `report/` folder with Jekyll and deploys it to GitHub Pages.
 - `php.yml`
-  Validates and installs Composer dependencies in CI, although the current repository does not yet include `composer.json` or `composer.lock`.
+  Validates Composer configuration and installs Composer dependencies in CI. The project currently defines `composer.json`, while `composer.lock` is generated only after dependency installation.
 
 ## Assessment
 
