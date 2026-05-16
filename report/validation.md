@@ -7,11 +7,12 @@ nav_order: 6
 
 ## Testing Approach
 
-The project was checked in three ways:
+The project was checked in four ways:
 
 1. Code-level checks were used to verify that the PHP files do not contain syntax errors.
 2. PHPUnit automated tests were used to verify reusable PHP helper functions and syntax-check all PHP pages.
-3. Manual browser testing was used to verify that the website workflows behave correctly from the user's point of view.
+3. Playwright browser end-to-end testing was used to verify the local website through Chromium.
+4. Manual browser testing was used to verify that the website workflows behave correctly from the user's point of view.
 
 The repository now includes automated unit tests for helper logic. Full end-to-end application validation is still mainly manual because the project is a PHP/MySQL web application that depends on a local XAMPP database and browser interaction.
 
@@ -70,6 +71,49 @@ OK
 ```
 
 The automated tests check currency options, currency formatting, money formatting, HTML escaping, month-key generation, selected-currency validation, budget progress calculation, CSRF token verification, receipt upload validation, receipt deletion, report helper behavior, and PHP syntax validity for application pages.
+
+## Playwright Browser End-to-End Test
+
+Playwright was added as a browser-based end-to-end testing tool through Python. It launches Chromium and tests the local XAMPP website as a real user.
+
+Setup commands:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python -m playwright install chromium
+```
+
+Command used:
+
+```powershell
+python tests/e2e/playwright_smoke.py
+```
+
+Result:
+
+```text
+Playwright full-site E2E test passed.
+```
+
+The Playwright test covers:
+
+- login page rendering
+- invalid login handling
+- register page rendering
+- forgot-password page rendering
+- protected dashboard redirect when unauthenticated
+- new user registration
+- login with the new user
+- dashboard rendering
+- item creation
+- category creation
+- budget creation
+- expense creation
+- expense filtering
+- recurring expense creation
+- authenticated page navigation for dashboard, expense management, reports, profile, and password pages
+
+The local test requires Apache and MySQL to be running in XAMPP and the `detsdb` database to be imported. The same script can optionally check the published report site by setting `RUN_REPORT_CHECK=1`.
 
 ## Manual Website Testing Procedure
 
@@ -136,10 +180,9 @@ The implemented pages support the main workflow successfully:
 - CSRF protection is present in several newer forms.
 - Password storage still uses MD5 in older authentication logic, which is not secure by modern standards.
 - Schema updates are triggered at runtime through helper logic instead of a dedicated migration system.
-- Automated unit and syntax-smoke tests are included; browser-level automation is not yet included.
+- Automated unit, syntax-smoke, and Playwright browser end-to-end tests are included.
 
 ## Suggested Validation Improvements
 
-- Add browser-level automation with Playwright or Selenium.
-- Add integration tests for login, expense creation, recurring processing, and report generation.
+- Extend Playwright tests with deletion flows, edit flows, CSV download assertions, and screenshot comparison.
 - Add security-focused validation for authentication and file uploads.

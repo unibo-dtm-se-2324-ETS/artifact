@@ -48,6 +48,28 @@ Automated unit tests can be run with:
 composer test
 ```
 
+Playwright full-site browser tests can be run with:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m playwright install chromium
+python tests/e2e/playwright_smoke.py
+```
+
+The Playwright test uses Chromium against the local XAMPP application. Start Apache and MySQL, make sure the `detsdb` database is imported, then run:
+
+```bash
+$env:APP_BASE_URL="http://localhost/Expense-Tracker-System/"
+python tests/e2e/playwright_smoke.py
+```
+
+To also check the published report site:
+
+```bash
+$env:RUN_REPORT_CHECK="1"
+python tests/e2e/playwright_smoke.py
+```
+
 ## License
 
 This project is released under the MIT License.
