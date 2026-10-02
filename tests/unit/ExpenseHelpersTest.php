@@ -111,4 +111,102 @@ final class ExpenseHelpersTest extends TestCase
 
         $this->assertFileDoesNotExist($receiptPath);
     }
+
+    public function testDeleteReceiptFileIgnoresEmptyAndMissingPaths(): void
+    {
+        expense_delete_receipt_file('');
+        expense_delete_receipt_file('   ');
+        expense_delete_receipt_file('uploads/receipts/does-not-exist.pdf');
+
+        $this->addToAssertionCount(1);
+    }
+
+    public function testEverySupportedCurrencyHasASymbol(): void
+    {
+        $expected = array('USD' => '$', 'EUR' => '€', 'IQD' => 'IQD', 'GBP' => '£', 'AED' => 'AED', 'SAR' => 'SAR');
+
+        foreach ($expected as $code => $symbol) {
+            $this->assertSame($symbol, expense_currency_symbol($code));
+        }
+    }
+
+    public function testMoneyFormattingAcceptsStringsAndRoundsToTwoDecimals(): void
+    {
+        $this->assertSame('0.00 €', expense_money('abc', 'EUR'));
+        $this->assertSame('3.14 £', expense_money('3.14159', 'GBP'));
+        $this->assertSame('1,234,567.80 JPY', expense_money(1234567.8, 'JPY'));
+    }
+
+    public function testHtmlEscapingHandlesNullNumbersAndQuotes(): void
+    {
+        $this->assertSame('', expense_h(null));
+        $this->assertSame('42', expense_h(42));
+        $this->assertSame('&quot;a&quot; &amp; &#039;b&#039;', expense_h('"a" & \'b\''));
+    }
+
+    public function testMonthKeyDefaultsToTheCurrentMonth(): void
+    {
+        $this->assertSame(date('Y-m'), expense_month_key());
+        $this->assertSame(date('Y-m'), expense_month_key(null));
+    }
+
+    public function testSelectedCurrencyUsesUsdByDefaultAndAcceptsEmptyInput(): void
+    {
+        $this->assertSame('USD', expense_selected_currency('nonsense'));
+        $this->assertSame('USD', expense_selected_currency(''));
+        $this->assertSame('USD', expense_selected_currency(null));
+        $this->assertSame('SAR', expense_selected_currency('sar'));
+    }
+
+    public function testBudgetProgressHandlesNegativeAndStringValues(): void
+    {
+        $this->assertSame(0, expense_budget_progress(50, -10));
+        $this->assertSame(0, expense_budget_progress(50, '0'));
+        $this->assertEquals(0, expense_budget_progress(0, 100));
+        $this->assertEquals(0, expense_budget_progress(-20, 100));
+        $this->assertEquals(25, expense_budget_progress('25', '100'));
+    }
+
+    public function testCsrfTokenIsStableWithinASession(): void
+    {
+        $this->assertSame(expense_csrf_token(), expense_csrf_token());
+    }
+
+    public function testCsrfVerificationRejectsMissingNonStringAndEmptyTokens(): void
+    {
+        $this->assertFalse(expense_verify_csrf('anything'));
+
+        expense_csrf_token();
+
+        $this->assertFalse(expense_verify_csrf(null));
+        $this->assertFalse(expense_verify_csrf(123));
+        $this->assertFalse(expense_verify_csrf(''));
+    }
+
+    public function testReceiptUploadReportsUploadErrors(): void
+    {
+        $this->assertSame(
+            array('path' => '', 'error' => 'Receipt upload failed.'),
+            expense_handle_receipt_upload(array('error' => UPLOAD_ERR_INI_SIZE), 1)
+        );
+        $this->assertSame(
+            array('path' => '', 'error' => ''),
+            expense_handle_receipt_upload(array(), 1)
+        );
+    }
+
+    public function testReceiptUploadAcceptsAllowedExtensionsCaseInsensitively(): void
+    {
+        foreach (array('scan.JPG', 'scan.jpeg', 'scan.Png', 'scan.pdf') as $name) {
+            $result = expense_handle_receipt_upload(
+                array('error' => UPLOAD_ERR_OK, 'name' => $name, 'tmp_name' => __FILE__),
+                1
+            );
+
+            // The file was not a real HTTP upload, so saving is refused, but
+            // the extension itself must not be the reason.
+            $this->assertSame('Could not save the uploaded receipt.', $result['error'], $name);
+            $this->assertSame('', $result['path']);
+        }
+    }
 }

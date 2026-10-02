@@ -45,6 +45,43 @@ final class ReportHelpersTest extends TestCase
         $this->assertSame('USD', report_selected_currency('currency'));
     }
 
+    public function testReportCurrencySymbolsAndUnknownCurrencyFallback(): void
+    {
+        $expected = array('USD' => '$', 'EUR' => '€', 'IQD' => 'IQD', 'GBP' => '£', 'AED' => 'AED', 'SAR' => 'SAR');
+
+        foreach ($expected as $code => $symbol) {
+            $this->assertSame($symbol, report_currency_symbol($code));
+        }
+        $this->assertSame('JPY', report_currency_symbol('JPY'));
+    }
+
+    public function testReportMoneyHandlesStringsAndThousandsSeparators(): void
+    {
+        $this->assertSame('0.00 $', report_money('abc', 'USD'));
+        $this->assertSame('1,234.50 IQD', report_money('1234.5', 'IQD'));
+    }
+
+    public function testReportSelectedCurrencyReadsGetWhenPostIsMissing(): void
+    {
+        $_GET['currency'] = ' gbp ';
+
+        $this->assertSame('GBP', report_selected_currency('currency'));
+    }
+
+    public function testReportSelectedCurrencyRejectsUnsupportedPostValue(): void
+    {
+        $_POST['currency'] = 'jpy';
+        $_GET['currency'] = 'GBP';
+
+        $this->assertSame('USD', report_selected_currency('currency'));
+    }
+
+    public function testReportHtmlEscapingHandlesNullAndNumbers(): void
+    {
+        $this->assertSame('', report_h(null));
+        $this->assertSame('7', report_h(7));
+    }
+
     public function testReportHtmlEscapingProtectsSpecialCharacters(): void
     {
         $this->assertSame(

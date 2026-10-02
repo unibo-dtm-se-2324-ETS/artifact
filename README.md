@@ -57,6 +57,8 @@ Locally, selected syntax checks can be run with:
 composer run lint
 ```
 
+The unit tests cover the helper functions and, against a separate `detsdb_test` MySQL database (created automatically, your real data is never touched), the database functions. If no MySQL server is reachable the database tests are skipped. Set `TEST_DB_HOST`, `TEST_DB_USER`, `TEST_DB_PASS` and `TEST_DB_NAME` to change the connection.
+
 Automated unit tests can be run with:
 
 ```bash

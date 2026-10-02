@@ -15,6 +15,25 @@ jobs:
     name: Lint, test and coverage
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      TEST_DB_HOST: 127.0.0.1
+      TEST_DB_USER: root
+      TEST_DB_PASS: root
+      TEST_DB_NAME: detsdb_test
+
     steps:
       - uses: actions/checkout@v4
 
@@ -22,6 +41,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
+          extensions: mysqli
           coverage: pcov
 
       - name: Validate composer.json and composer.lock
