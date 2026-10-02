@@ -44,13 +44,9 @@ jobs:
       - name: Run unit tests with coverage
         run: composer run test:coverage
 
-      - name: Add coverage summary to the job page
+      - name: Add coverage table to the job summary
         if: always()
-        run: |
-          echo '### Code coverage' >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          php -r '$x=simplexml_load_file("build/coverage/clover.xml"); $m=$x->project->metrics; printf("Statements: %d/%d (%.1f%%)\n",$m["coveredstatements"],$m["statements"],100*$m["coveredstatements"]/max(1,$m["statements"]));' >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+        run: php scripts/coverage-summary.php build/coverage/clover.xml >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload coverage report
         if: always()
