@@ -49,7 +49,7 @@ repository, so that there is only one copy of the document.
 ## Build And Checks
 
 - PHP syntax check workflow: `.github/workflows/main.yml`
-- CI workflow (`.github/workflows/php.yml`): validates Composer files, lints, runs the unit tests with a pcov code coverage report (uploaded as the `coverage-report` artifact), then builds the release package (`expense-tracker.zip`) once the tests pass
+- CI workflow (`.github/workflows/php.yml`): validates Composer files, lints, runs the unit tests with a pcov code coverage report (uploaded as the `coverage-report` artifact), runs the Playwright browser test against the app with a MySQL service, then builds the release package (`expense-tracker.zip`) once both pass
 
 Locally, selected syntax checks can be run with:
 

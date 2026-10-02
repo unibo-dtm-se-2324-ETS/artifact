@@ -76,9 +76,75 @@ jobs:
           path: build/coverage
           retention-days: 14
 
+  e2e:
+    name: Browser end-to-end test
+    needs: test
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_USER: root
+      DB_PASS: root
+      DB_NAME: detsdb
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mysqli
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Playwright and Chromium
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Import the database
+        run: mysql -h 127.0.0.1 -uroot -proot < database/database.sql
+
+      - name: Start the web server
+        run: |
+          php -S 127.0.0.1:8000 -t public > php-server.log 2>&1 &
+          for i in $(seq 1 20); do curl -sf http://127.0.0.1:8000/ > /dev/null && break; sleep 1; done
+
+      - name: Run the browser test
+        env:
+          APP_BASE_URL: http://127.0.0.1:8000/
+        run: python tests/e2e/playwright_smoke.py
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failure
+          path: |
+            tests/e2e/artifacts
+            php-server.log
+          retention-days: 7
+
   build:
     name: Build release package
-    needs: test
+    needs: [test, e2e]
     runs-on: ubuntu-latest
 
     steps:
