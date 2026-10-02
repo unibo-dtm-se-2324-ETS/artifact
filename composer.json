@@ -11,6 +11,12 @@
   },
   "scripts": {
     "lint": "php -l add-expense.php && php -l dashboard.php && php -l manage-expense.php && php -l includes/expense-helpers.php && php -l includes/report-helpers.php",
-    "test": "phpunit"
+    "test": "phpunit --no-coverage",
+    "test:coverage": "phpunit --coverage-text --coverage-clover build/coverage/clover.xml --coverage-html build/coverage/html",
+    "build": "@php build.php",
+    "ci": [
+      "@lint",
+      "@test:coverage"
+    ]
   }
 }

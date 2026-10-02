@@ -1,48 +1,79 @@
-name: PHP Composer
+name: CI
 
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'composer.json'
-      - 'composer.lock'
-      - '**.php'
-      - '.github/workflows/php.yml'
   pull_request:
     branches: [ "main" ]
-    paths:
-      - 'composer.json'
-      - 'composer.lock'
-      - '**.php'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  build:
-
+  test:
+    name: Lint, test and coverage
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+      - name: Set up PHP with pcov
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: pcov
 
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
 
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
 
-    # - name: Run test suite
-    #   run: composer run-script test
+      - name: Lint
+        run: composer run lint
+
+      - name: Run unit tests with coverage
+        run: composer run test:coverage
+
+      - name: Add coverage summary to the job page
+        if: always()
+        run: |
+          echo '### Code coverage' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          php -r '$x=simplexml_load_file("build/coverage/clover.xml"); $m=$x->project->metrics; printf("Statements: %d/%d (%.1f%%)\n",$m["coveredstatements"],$m["statements"],100*$m["coveredstatements"]/max(1,$m["statements"]));' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: build/coverage
+          retention-days: 14
+
+  build:
+    name: Build release package
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build package
+        run: php build.php
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: expense-tracker
+          path: build/expense-tracker.zip
+          retention-days: 7

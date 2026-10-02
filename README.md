@@ -39,8 +39,7 @@ repository, so that there is only one copy of the document.
 ## Build And Checks
 
 - PHP syntax check workflow: `.github/workflows/main.yml`
-- Composer dependency workflow: `.github/workflows/php.yml`
-- Release artifact workflow: `.github/workflows/artifact.yml`
+- CI workflow (`.github/workflows/php.yml`): validates Composer files, lints, runs the unit tests with a pcov code coverage report (uploaded as the `coverage-report` artifact), then builds the release package (`expense-tracker.zip`) once the tests pass
 
 Locally, selected syntax checks can be run with:
 
@@ -53,6 +52,14 @@ Automated unit tests can be run with:
 ```bash
 composer test
 ```
+
+Unit tests with a code coverage report (needs the PCOV or Xdebug extension; the HTML report is written to `build/coverage/html`):
+
+```bash
+composer test:coverage
+```
+
+The release package can be built locally with `composer build`, which writes `build/expense-tracker.zip`.
 
 Playwright full-site browser tests can be run with:
 
