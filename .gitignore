@@ -6,3 +6,4 @@ tests/e2e/artifacts/
 # repository so that the report is not duplicated here.
 .tmp-reportrepo-sync/
 build/
+.sass-cache/
