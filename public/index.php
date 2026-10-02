@@ -1,22 +1,19 @@
-<?php
-session_start();
+<?php session_start();
 error_reporting(0);
-include('config/database.php');
+include(__DIR__ . '/../config/database.php');
 
-if(isset($_POST['submit']))
+if(isset($_POST['login']))
   {
-    $contactno=$_POST['contactno'];
     $email=$_POST['email'];
-
-        $query=mysqli_query($con,"select ID from tbluser where  Email='$email' and MobileNumber='$contactno' ");
+    $password=md5($_POST['password']);
+    $query=mysqli_query($con,"select ID from tbluser where  Email='$email' && Password='$password' ");
     $ret=mysqli_fetch_array($query);
     if($ret>0){
-      $_SESSION['contactno']=$contactno;
-      $_SESSION['email']=$email;
-     header('location:reset-password.php');
+      $_SESSION['detsuid']=$ret['ID'];
+     header('location:dashboard.php');
     }
     else{
-      $msg="Invalid Details. Please try again.";
+    $msg="Invalid Details.";
     }
   }
   ?>
@@ -25,13 +22,14 @@ if(isset($_POST['submit']))
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Daily Expense Tracker - Forgot Password</title>
+	<title>Daily Expense Tracker - Login</title>
 	<link href="assets/css/bootstrap.min.css" rel="stylesheet">
 	<link href="assets/css/datepicker3.css" rel="stylesheet">
 	<link href="assets/css/styles.css" rel="stylesheet">
 	
 </head>
 <body class="auth-page">
+
 	<div class="row">
 			<h2 align="center">Daily Expense Tracker</h2>
 	<hr />
@@ -47,14 +45,13 @@ if(isset($_POST['submit']))
 							<div class="form-group">
 								<input class="form-control" placeholder="E-mail" name="email" type="email" autofocus="" required="true">
 							</div>
-							
+							<a href="forgot-password.php">Forgot Password?</a>
 							<div class="form-group">
-								<input class="form-control" placeholder="Mobile Number" name="contactno" type="contactno" value="" required="true">
+								<input class="form-control" placeholder="Password" name="password" type="password" value="" required="true">
 							</div>
 							<div class="checkbox auth-actions">
-								<button type="submit" value="" name="submit" class="btn btn-primary">Reset</button>
-								<a href="index.php" class="btn btn-primary">Login</a>
-
+								<button type="submit" value="login" name="login" class="btn btn-primary">Login</button>
+								<a href="register.php" class="btn btn-primary">Register</a>
 							</div>
 							</fieldset>
 					</form>

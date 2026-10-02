@@ -1,7 +1,7 @@
 <?php
 session_start();
 error_reporting(0);
-include('config/database.php');
+include(__DIR__ . '/../config/database.php');
 error_reporting(0);
 
 if(isset($_POST['submit']))

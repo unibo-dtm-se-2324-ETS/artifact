@@ -13,16 +13,22 @@ Expense Tracker System is a PHP and MySQL web application for recording personal
 
 ## Project Structure
 
-- Root `*.php` files are the application pages (kept at the web root so the URLs stay stable).
-- `src/` contains the shared business logic (expense and report helper functions).
-- `config/` contains the database connection settings.
-- `templates/` contains the shared layout pieces (header, sidebar, footer).
-- `assets/` contains the frontend resources (`css/`, `js/`, `fonts/`, `images/`, `plugins/`) and the Sass source.
-- `database/` contains the schema (`database.sql`) and the demo seed data.
-- `uploads/receipts/` stores uploaded receipt files.
-- `tests/` contains the unit tests and the browser end-to-end test.
-- `docs/` contains the acceptance checklist and the presentation material.
-- `.github/workflows/` contains CI/CD workflow definitions.
+```text
+Expense-Tracker-System/
+├── public/        Web root: the application pages, assets/ (css, js, fonts, images, plugins) and uploads/
+├── src/           Business logic: expense and report helper functions
+├── config/        Database connection settings
+├── templates/     Shared layout pieces (header, sidebar, footer)
+├── database/      Schema (database.sql) and demo seed data
+├── tests/         Unit tests and the browser end-to-end test
+├── docs/          Acceptance checklist and presentation material
+├── .github/       CI workflows (syntax check, tests + coverage, build)
+├── build.php      Builds the release package (composer build)
+├── index.php      Redirects the old address to public/
+└── composer.json  Dependencies and scripts (lint, test, test:coverage, build)
+```
+
+Uploaded receipts are stored in `public/uploads/receipts/`.
 
 ## Report
 
@@ -38,7 +44,7 @@ repository, so that there is only one copy of the document.
 4. Create the MySQL database.
 5. Import `database/database.sql`.
 6. Update `config/database.php` if the local database credentials are different.
-7. Open `http://localhost/Expense-Tracker-System/` in a browser.
+7. Open `http://localhost/Expense-Tracker-System/public/` in a browser.
 
 ## Build And Checks
 
@@ -76,7 +82,7 @@ python tests/e2e/playwright_smoke.py
 The Playwright test uses Chromium against the local XAMPP application. Start Apache and MySQL, make sure the `detsdb` database is imported, then run:
 
 ```bash
-$env:APP_BASE_URL="http://localhost/Expense-Tracker-System/"
+$env:APP_BASE_URL="http://localhost/Expense-Tracker-System/public/"
 python tests/e2e/playwright_smoke.py
 ```
 

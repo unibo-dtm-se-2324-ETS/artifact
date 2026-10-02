@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 from playwright.sync_api import Error, Page, expect, sync_playwright
 
 
-APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost/Expense-Tracker-System/")
+APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost/Expense-Tracker-System/public/")
 RUN_REPORT_CHECK = os.getenv("RUN_REPORT_CHECK", "0") == "1"
 REPORT_BASE_URL = os.getenv(
     "REPORT_BASE_URL",
@@ -70,7 +70,7 @@ def check_protected_redirect(browser) -> None:
     page = context.new_page()
     try:
         goto_app(page, "dashboard.php")
-        expect(page).to_have_url(re.compile(r"(index|logout)\.php$|Expense-Tracker-System/?$"))
+        expect(page).to_have_url(re.compile(r"(index|logout)\.php$|Expense-Tracker-System(/public)?/?$"))
         expect(page.get_by_text("Log in")).to_be_visible()
     finally:
         context.close()

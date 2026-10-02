@@ -1,8 +1,8 @@
 <?php
 session_start();
 error_reporting(0);
-include('config/database.php');
-include('src/expense-helpers.php');
+include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
 
 if (strlen($_SESSION['detsuid']) == 0) {
   header('location:logout.php');
@@ -333,8 +333,8 @@ $currencyTotalsUsed = array_filter($currencyTotals, function ($total) { return (
   </style>
 </head>
 <body class="app-page dashboard-page">
-  <?php include_once('templates/header.php'); ?>
-  <?php include_once('templates/sidebar.php'); ?>
+  <?php include_once(__DIR__ . '/../templates/header.php'); ?>
+  <?php include_once(__DIR__ . '/../templates/sidebar.php'); ?>
 
   <div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main dashboard-shell">
     <div class="dashboard-hero">
@@ -537,7 +537,7 @@ $currencyTotalsUsed = array_filter($currencyTotals, function ($total) { return (
     </div>
   </div>
 
-  <?php include_once('templates/footer.php'); ?>
+  <?php include_once(__DIR__ . '/../templates/footer.php'); ?>
   <script src="assets/js/jquery-1.11.1.min.js"></script>
   <script src="assets/js/bootstrap.min.js"></script>
   <script src="assets/js/chart.min.js"></script>

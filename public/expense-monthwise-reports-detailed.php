@@ -1,8 +1,8 @@
 <?php
 session_start();
 error_reporting(0);
-include('config/database.php');
-include('src/report-helpers.php');
+include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/report-helpers.php');
 if (strlen($_SESSION['detsuid']==0)) {
   header('location:logout.php');
 } else {
@@ -133,8 +133,8 @@ if (strlen($_SESSION['detsuid']==0)) {
   </style>
 </head>
 <body>
-  <?php include_once('templates/header.php');?>
-  <?php include_once('templates/sidebar.php');?>
+  <?php include_once(__DIR__ . '/../templates/header.php');?>
+  <?php include_once(__DIR__ . '/../templates/sidebar.php');?>
   <div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main report-shell">
     <div class="report-block">
       <h1 class="report-title">Monthly report</h1>

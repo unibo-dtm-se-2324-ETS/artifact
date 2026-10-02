@@ -24,7 +24,7 @@ final class SyntaxCheckTest extends TestCase
     {
         $root = dirname(__DIR__, 2);
         $files = array_merge(
-            glob($root . DIRECTORY_SEPARATOR . '*.php') ?: array(),
+            glob($root . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . '*.php') ?: array(),
             glob($root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '*.php') ?: array(),
             glob($root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . '*.php') ?: array(),
             glob($root . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . '*.php') ?: array()

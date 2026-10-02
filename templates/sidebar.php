@@ -1,7 +1,7 @@
 <?php
 session_start();
 error_reporting(0);
-include('config/database.php');
+include(__DIR__ . '/../config/database.php');
 ?>
 <?php
 $currentPage = basename($_SERVER['PHP_SELF']);

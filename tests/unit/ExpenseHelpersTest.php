@@ -97,7 +97,7 @@ final class ExpenseHelpersTest extends TestCase
 
     public function testDeleteReceiptFileRemovesExistingReceipt(): void
     {
-        $receiptDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts';
+        $receiptDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts';
         if (!is_dir($receiptDir)) {
             mkdir($receiptDir, 0777, true);
         }

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('config/database.php');
+include(__DIR__ . '/../config/database.php');
 error_reporting(0);
 if (strlen($_SESSION['detsuid']==0)) {
   header('location:logout.php');
@@ -54,8 +54,8 @@ return true;
 </script>
 </head>
 <body>
-	<?php include_once('templates/header.php');?>
-	<?php include_once('templates/sidebar.php');?>
+	<?php include_once(__DIR__ . '/../templates/header.php');?>
+	<?php include_once(__DIR__ . '/../templates/sidebar.php');?>
 		
 	<div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main">
 		<div class="row">
@@ -116,7 +116,7 @@ while ($row=mysqli_fetch_array($ret)) {
 					</div>
 				</div><!-- /.panel-->
 			</div><!-- /.col-->
-			<?php include_once('templates/footer.php');?>
+			<?php include_once(__DIR__ . '/../templates/footer.php');?>
 		</div><!-- /.row -->
 	</div><!--/.main-->
 	

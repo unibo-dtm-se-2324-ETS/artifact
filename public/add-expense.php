@@ -1,8 +1,8 @@
 <?php
 session_start();
 error_reporting(0);
-include('config/database.php');
-include('src/expense-helpers.php');
+include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
 
 if (strlen($_SESSION['detsuid']) == 0) {
   header('location:logout.php');
@@ -10,45 +10,32 @@ if (strlen($_SESSION['detsuid']) == 0) {
 }
 
 $userid = (int)$_SESSION['detsuid'];
-$editid = isset($_GET['editid']) ? (int)$_GET['editid'] : 0;
 $msg = '';
+$currencyOptions = expense_currency_options();
 
 expense_ensure_schema($con);
 expense_ensure_user_categories($con, $userid);
 expense_process_recurring($con, $userid);
+
 $csrfToken = expense_csrf_token();
-
-$expense = expense_fetch_one_assoc(
-  expense_prepare_and_execute(
-    $con,
-    "SELECT ID, ExpenseDate, ExpenseItem, ExpenseCost, Currency, CategoryId, Notes, ReceiptPath FROM tblexpense WHERE ID=? AND UserId=? LIMIT 1",
-    'ii',
-    array($editid, $userid)
-  )
-);
-
-if (!$expense) {
-  $msg = 'Invalid expense record.';
-}
-
+$settings = expense_get_user_settings($con, $userid);
 $form = array(
-  'dateexpense' => $expense ? $expense['ExpenseDate'] : date('Y-m-d'),
-  'item' => $expense ? $expense['ExpenseItem'] : '',
-  'costitem' => $expense ? $expense['ExpenseCost'] : '',
-  'currency' => $expense ? expense_selected_currency($expense['Currency']) : 'USD',
-  'categoryid' => $expense && $expense['CategoryId'] ? (string)$expense['CategoryId'] : '',
-  'notes' => $expense ? $expense['Notes'] : ''
+  'dateexpense' => date('Y-m-d'),
+  'item' => '',
+  'costitem' => '',
+  'currency' => $settings['DefaultCurrency'],
+  'categoryid' => $settings['DefaultCategoryId'] ? (string)$settings['DefaultCategoryId'] : '',
+  'notes' => ''
 );
 
-if ($expense && isset($_POST['submit'])) {
-  $form['dateexpense'] = isset($_POST['dateexpense']) ? trim($_POST['dateexpense']) : '';
+if (isset($_POST['submit'])) {
+  $form['dateexpense'] = isset($_POST['dateexpense']) ? trim($_POST['dateexpense']) : date('Y-m-d');
   $form['item'] = isset($_POST['item']) ? trim($_POST['item']) : '';
   $form['costitem'] = isset($_POST['costitem']) ? trim($_POST['costitem']) : '';
-  $form['currency'] = expense_selected_currency(isset($_POST['currency']) ? $_POST['currency'] : 'USD');
+  $form['currency'] = expense_selected_currency(isset($_POST['currency']) ? $_POST['currency'] : $settings['DefaultCurrency']);
   $form['categoryid'] = isset($_POST['categoryid']) ? trim($_POST['categoryid']) : '';
   $form['notes'] = isset($_POST['notes']) ? trim($_POST['notes']) : '';
   $categoryId = (int)$form['categoryid'];
-  $removeReceipt = isset($_POST['remove_receipt']) ? 1 : 0;
 
   if (!expense_verify_csrf(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '')) {
     $msg = 'Your session expired. Please try again.';
@@ -65,34 +52,22 @@ if ($expense && isset($_POST['submit'])) {
     if (!$category) {
       $msg = 'The selected category is invalid.';
     } else {
-      $receiptPath = $expense['ReceiptPath'];
-      if ($removeReceipt) {
-        expense_delete_receipt_file($receiptPath);
-        $receiptPath = '';
-      }
-
       $upload = expense_handle_receipt_upload(isset($_FILES['receipt']) ? $_FILES['receipt'] : array(), $userid);
       if ($upload['error'] !== '') {
         $msg = $upload['error'];
-      } elseif ($upload['path'] !== '') {
-        if (!empty($receiptPath)) {
-          expense_delete_receipt_file($receiptPath);
-        }
-        $receiptPath = $upload['path'];
-      }
-
-      if ($msg == '') {
+      } else {
         $cost = (float)$form['costitem'];
+        $receiptPath = $upload['path'];
         $stmt = expense_prepare_and_execute(
           $con,
-          "UPDATE tblexpense SET ExpenseDate=?, ExpenseItem=?, ExpenseCost=?, Currency=?, CategoryId=?, Notes=?, ReceiptPath=? WHERE ID=? AND UserId=?",
-          'ssdsissii',
-          array($form['dateexpense'], $form['item'], $cost, $form['currency'], $categoryId, $form['notes'], $receiptPath, $editid, $userid)
+          "INSERT INTO tblexpense (UserId, ExpenseDate, ExpenseItem, ExpenseCost, Currency, CategoryId, Notes, ReceiptPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+          'issdsiss',
+          array($userid, $form['dateexpense'], $form['item'], $cost, $form['currency'], $categoryId, $form['notes'], $receiptPath)
         );
 
         if ($stmt) {
           expense_close_statement($stmt);
-          header('Location: manage-expense.php?status=updated');
+          header('Location: manage-expense.php?status=added');
           exit;
         }
 
@@ -106,14 +81,13 @@ $items = expense_fetch_all_assoc(
   expense_prepare_and_execute($con, "SELECT ItemName FROM tblitems WHERE UserId=? ORDER BY ItemName ASC", 'i', array($userid))
 );
 $categories = expense_get_categories($con, $userid);
-$currencyOptions = expense_currency_options();
 ?>
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Daily Expense Tracker || Edit Expense</title>
+  <title>Daily Expense Tracker || Add Expense</title>
   <link href="assets/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/css/font-awesome.min.css" rel="stylesheet">
   <link href="assets/css/datepicker3.css" rel="stylesheet">
@@ -124,12 +98,14 @@ $currencyOptions = expense_currency_options();
     .expense-card { background: #fff; border: 1px solid #dbe4ee; border-radius: 18px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06); padding: 24px; }
     .page-title { margin: 0 0 6px; font-size: 28px; font-weight: 700; color: #0f172a; }
     .page-copy { margin: 0 0 22px; color: #64748b; }
-    .receipt-box { padding: 12px 14px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 14px; }
+    .helper-links { margin-top: 8px; color: #64748b; font-size: 12px; }
+    .helper-links a { font-weight: 600; }
+    .alert-inline { margin-bottom: 18px; }
   </style>
 </head>
 <body>
-  <?php include_once('templates/header.php'); ?>
-  <?php include_once('templates/sidebar.php'); ?>
+  <?php include_once(__DIR__ . '/../templates/header.php'); ?>
+  <?php include_once(__DIR__ . '/../templates/sidebar.php'); ?>
 
   <div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main expense-shell">
     <div class="row">
@@ -138,17 +114,16 @@ $currencyOptions = expense_currency_options();
           <ol class="breadcrumb">
             <li><a href="dashboard.php"><em class="fa fa-home"></em></a></li>
             <li><a href="manage-expense.php">Expenses</a></li>
-            <li class="active">Edit Expense</li>
+            <li class="active">Add Expense</li>
           </ol>
 
-          <h1 class="page-title">Edit expense</h1>
-          <p class="page-copy">Update the item, category, notes, receipt, amount, and currency.</p>
+          <h1 class="page-title">Add expense</h1>
+          <p class="page-copy">Capture the amount, category, note, receipt, and currency in one step.</p>
 
           <?php if ($msg != '') { ?>
-          <div class="alert alert-danger"><?php echo expense_h($msg); ?></div>
+          <div class="alert alert-danger alert-inline"><?php echo expense_h($msg); ?></div>
           <?php } ?>
 
-          <?php if ($expense) { ?>
           <form method="post" action="" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?php echo expense_h($csrfToken); ?>">
             <div class="row">
@@ -180,6 +155,7 @@ $currencyOptions = expense_currency_options();
                     <option value="<?php echo expense_h($itemRow['ItemName']); ?>" <?php if ($form['item'] == $itemRow['ItemName']) { echo 'selected'; } ?>><?php echo expense_h($itemRow['ItemName']); ?></option>
                     <?php } ?>
                   </select>
+                  <div class="helper-links">Missing an item? <a href="add-item.php">Add a new item</a>.</div>
                 </div>
               </div>
               <div class="col-md-6">
@@ -191,6 +167,7 @@ $currencyOptions = expense_currency_options();
                     <option value="<?php echo (int)$category['ID']; ?>" <?php if ((string)$form['categoryid'] === (string)$category['ID']) { echo 'selected'; } ?>><?php echo expense_h($category['CategoryName']); ?></option>
                     <?php } ?>
                   </select>
+                  <div class="helper-links">Need a new category or budget? <a href="manage-categories.php">Manage categories and budgets</a>.</div>
                 </div>
               </div>
             </div>
@@ -199,23 +176,16 @@ $currencyOptions = expense_currency_options();
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="costitem">Cost of Item</label>
-                  <input class="form-control" type="number" min="0.01" step="0.01" id="costitem" name="costitem" required value="<?php echo expense_h($form['costitem']); ?>">
+                  <input class="form-control" type="number" min="0.01" step="0.01" id="costitem" name="costitem" required value="<?php echo expense_h($form['costitem']); ?>" placeholder="0.00">
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="receipt">Replace Receipt</label>
+                  <label for="receipt">Receipt</label>
                   <input class="form-control" type="file" id="receipt" name="receipt" accept=".jpg,.jpeg,.png,.pdf">
                 </div>
               </div>
             </div>
-
-            <?php if (!empty($expense['ReceiptPath'])) { ?>
-            <div class="receipt-box">
-              <div><strong>Current receipt:</strong> <a href="<?php echo expense_h($expense['ReceiptPath']); ?>" target="_blank">Open receipt</a></div>
-              <label style="margin-top:8px;"><input type="checkbox" name="remove_receipt" value="1"> Remove current receipt</label>
-            </div>
-            <?php } ?>
 
             <div class="form-group">
               <label for="notes">Notes</label>
@@ -223,14 +193,13 @@ $currencyOptions = expense_currency_options();
             </div>
 
             <div class="form-group">
-              <button type="submit" class="btn btn-primary" name="submit">Update Expense</button>
+              <button type="submit" class="btn btn-primary" name="submit">Add Expense</button>
               <a href="manage-expense.php" class="btn btn-default">Cancel</a>
             </div>
           </form>
-          <?php } ?>
         </div>
       </div>
-      <?php include_once('templates/footer.php'); ?>
+      <?php include_once(__DIR__ . '/../templates/footer.php'); ?>
     </div>
   </div>
 

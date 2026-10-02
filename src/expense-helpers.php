@@ -327,7 +327,7 @@ if (!function_exists('expense_handle_receipt_upload')) {
       return array('path' => '', 'error' => 'Receipt must be a JPG, PNG, or PDF file.');
     }
 
-    $uploadDir = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts';
+    $uploadDir = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts';
     if (!is_dir($uploadDir)) {
       mkdir($uploadDir, 0777, true);
     }
@@ -354,7 +354,7 @@ if (!function_exists('expense_delete_receipt_file')) {
       return;
     }
 
-    $fullPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $relativePath);
+    $fullPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $relativePath);
     if (is_file($fullPath)) {
       @unlink($fullPath);
     }

@@ -1,16 +1,16 @@
 <?php
 session_start();
 error_reporting(0);
-include('config/database.php');
-include('src/report-helpers.php');
+include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/report-helpers.php');
 if (strlen($_SESSION['detsuid']==0)) {
   header('location:logout.php');
 } else {
   $userid = $_SESSION['detsuid'];
   $currency = report_selected_currency('currency');
   $msg = '';
-  $fromDate = isset($_POST['fromdate']) ? $_POST['fromdate'] : (isset($_GET['fromdate']) ? $_GET['fromdate'] : '');
-  $toDate = isset($_POST['todate']) ? $_POST['todate'] : (isset($_GET['todate']) ? $_GET['todate'] : '');
+  $fromYear = isset($_POST['fromyear']) ? intval($_POST['fromyear']) : (isset($_GET['fromyear']) ? intval($_GET['fromyear']) : 0);
+  $toYear = isset($_POST['toyear']) ? intval($_POST['toyear']) : (isset($_GET['toyear']) ? intval($_GET['toyear']) : 0);
   $rows = array();
   $labels = array();
   $values = array();
@@ -18,6 +18,8 @@ if (strlen($_SESSION['detsuid']==0)) {
   $recordCount = 0;
   $topPeriodLabel = 'N/A';
   $topPeriodValue = 0;
+  $fromDate = '';
+  $toDate = '';
   $exportLink = '';
   $categoryRows = array();
   $categoryLabels = array();
@@ -28,15 +30,17 @@ if (strlen($_SESSION['detsuid']==0)) {
     mysqli_query($con, "ALTER TABLE tblexpense ADD COLUMN Currency varchar(10) NOT NULL DEFAULT 'USD' AFTER ExpenseCost");
   }
 
-  if ($fromDate == '' || $toDate == '') {
-    $msg = 'Please choose both dates.';
-  } elseif ($fromDate > $toDate) {
-    $msg = 'From date cannot be after To date.';
+  if ($fromYear == 0 || $toYear == 0) {
+    $msg = 'Please choose both years.';
+  } elseif ($fromYear > $toYear) {
+    $msg = 'From year cannot be after To year.';
   } else {
-    $query = mysqli_query($con, "SELECT ExpenseDate, SUM(ExpenseCost) as totalamount FROM tblexpense WHERE UserId='$userid' AND Currency='$currency' AND ExpenseDate BETWEEN '$fromDate' AND '$toDate' GROUP BY ExpenseDate ORDER BY ExpenseDate ASC");
+    $fromDate = $fromYear . '-01-01';
+    $toDate = $toYear . '-12-31';
+    $query = mysqli_query($con, "SELECT YEAR(ExpenseDate) as reportyear, SUM(ExpenseCost) as totalamount FROM tblexpense WHERE UserId='$userid' AND Currency='$currency' AND ExpenseDate BETWEEN '$fromDate' AND '$toDate' GROUP BY YEAR(ExpenseDate) ORDER BY YEAR(ExpenseDate)");
     while ($row = mysqli_fetch_array($query)) {
       $rows[] = $row;
-      $labels[] = date('M j', strtotime($row['ExpenseDate']));
+      $labels[] = (string)$row['reportyear'];
       $values[] = (float)$row['totalamount'];
       $totalExpense += (float)$row['totalamount'];
     }
@@ -47,15 +51,15 @@ if (strlen($_SESSION['detsuid']==0)) {
       $topPeriodValue = max($values);
       foreach ($rows as $row) {
         if ((float)$row['totalamount'] === (float)$topPeriodValue) {
-          $topPeriodLabel = date('F j, Y', strtotime($row['ExpenseDate']));
+          $topPeriodLabel = $row['reportyear'];
           break;
         }
       }
     }
 
-    $exportLink = 'expense-datewise-reports-detailed.php?' . http_build_query(array(
-      'fromdate' => $fromDate,
-      'todate' => $toDate,
+    $exportLink = 'expense-yearwise-reports-detailed.php?' . http_build_query(array(
+      'fromyear' => $fromYear,
+      'toyear' => $toYear,
       'currency' => $currency,
       'export' => 'csv'
     ));
@@ -72,12 +76,12 @@ if (strlen($_SESSION['detsuid']==0)) {
 
   if ($msg == '' && isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename=daily-report-' . date('Ymd-His') . '.csv');
+    header('Content-Disposition: attachment; filename=yearly-report-' . date('Ymd-His') . '.csv');
     $output = fopen('php://output', 'w');
-    fputcsv($output, array('Date', 'Total', 'Currency'));
+    fputcsv($output, array('Year', 'Total', 'Currency'));
     foreach ($rows as $row) {
       fputcsv($output, array(
-        $row['ExpenseDate'],
+        $row['reportyear'],
         number_format((float)$row['totalamount'], 2, '.', ''),
         $currency
       ));
@@ -92,7 +96,7 @@ if (strlen($_SESSION['detsuid']==0)) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Daily Expense Tracker || Daily Expense Report</title>
+  <title>Daily Expense Tracker || Yearly Expense Report</title>
   <link href="assets/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/css/font-awesome.min.css" rel="stylesheet">
   <link href="assets/css/datepicker3.css" rel="stylesheet">
@@ -127,13 +131,13 @@ if (strlen($_SESSION['detsuid']==0)) {
   </style>
 </head>
 <body>
-  <?php include_once('templates/header.php');?>
-  <?php include_once('templates/sidebar.php');?>
+  <?php include_once(__DIR__ . '/../templates/header.php');?>
+  <?php include_once(__DIR__ . '/../templates/sidebar.php');?>
   <div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main report-shell">
     <div class="report-block">
-      <h1 class="report-title">Daily report</h1>
-      <p class="report-subtitle">Range: <strong><?php echo report_h($fromDate); ?></strong> to <strong><?php echo report_h($toDate); ?></strong> in <strong><?php echo report_h($currency); ?></strong></p>
-      <a class="toolbar-link btn btn-default" href="expense-datewise-reports.php?cur=<?php echo report_h($currency); ?>">Change filters</a>
+      <h1 class="report-title">Yearly report</h1>
+      <p class="report-subtitle">Range: <strong><?php echo report_h((string)$fromYear); ?></strong> to <strong><?php echo report_h((string)$toYear); ?></strong> in <strong><?php echo report_h($currency); ?></strong></p>
+      <a class="toolbar-link btn btn-default" href="expense-yearwise-reports.php?cur=<?php echo report_h($currency); ?>">Change filters</a>
       <?php if ($msg == '') { ?><a class="toolbar-link btn btn-primary" href="<?php echo report_h($exportLink); ?>">Export CSV</a> <button type="button" class="toolbar-link btn btn-default" onclick="window.print()">Print</button><?php } ?>
       <?php if ($msg != '') { ?>
       <div class="alert-lite"><?php echo report_h($msg); ?></div>
@@ -143,9 +147,9 @@ if (strlen($_SESSION['detsuid']==0)) {
     <?php if ($msg == '') { ?>
     <div class="row">
       <div class="col-sm-6 col-md-3"><div class="report-block metric-card"><p class="metric-label">Total</p><h3 class="metric-value"><?php echo report_money($totalExpense, $currency); ?></h3></div></div>
-      <div class="col-sm-6 col-md-3"><div class="report-block metric-card"><p class="metric-label">Days With Spending</p><h3 class="metric-value"><?php echo $recordCount; ?></h3></div></div>
-      <div class="col-sm-6 col-md-3"><div class="report-block metric-card"><p class="metric-label">Highest Day</p><h3 class="metric-value"><?php echo report_money($topPeriodValue, $currency); ?></h3><p class="report-subtitle"><?php echo $topPeriodLabel; ?></p></div></div>
-      <div class="col-sm-6 col-md-3"><div class="report-block metric-card"><p class="metric-label">Avg / Day</p><h3 class="metric-value"><?php echo report_money($avgPeriodValue, $currency); ?></h3></div></div>
+      <div class="col-sm-6 col-md-3"><div class="report-block metric-card"><p class="metric-label">Years</p><h3 class="metric-value"><?php echo $recordCount; ?></h3></div></div>
+      <div class="col-sm-6 col-md-3"><div class="report-block metric-card"><p class="metric-label">Highest Year</p><h3 class="metric-value"><?php echo report_money($topPeriodValue, $currency); ?></h3><p class="report-subtitle"><?php echo $topPeriodLabel; ?></p></div></div>
+      <div class="col-sm-6 col-md-3"><div class="report-block metric-card"><p class="metric-label">Avg / Year</p><h3 class="metric-value"><?php echo report_money($avgPeriodValue, $currency); ?></h3></div></div>
     </div>
 
     <div class="row">
@@ -153,9 +157,9 @@ if (strlen($_SESSION['detsuid']==0)) {
         <div class="report-block">
           <h3 class="metric-label">Trend</h3>
           <?php if ($recordCount > 0) { ?>
-          <div class="chart-box" id="dailyLineChartWrap"><canvas id="dailyLineChart"></canvas></div>
+          <div class="chart-box" id="yearLineChartWrap"><canvas id="yearLineChart"></canvas></div>
           <?php } else { ?>
-          <div class="empty-state">No daily expenses found for this range.</div>
+          <div class="empty-state">No yearly expenses found for this range.</div>
           <?php } ?>
         </div>
       </div>
@@ -163,7 +167,7 @@ if (strlen($_SESSION['detsuid']==0)) {
         <div class="report-block">
           <h3 class="metric-label">Totals</h3>
           <?php if ($recordCount > 0) { ?>
-          <div class="chart-box" id="dailyBarChartWrap"><canvas id="dailyBarChart"></canvas></div>
+          <div class="chart-box" id="yearBarChartWrap"><canvas id="yearBarChart"></canvas></div>
           <?php } else { ?>
           <div class="empty-state">Nothing to compare yet.</div>
           <?php } ?>
@@ -176,13 +180,13 @@ if (strlen($_SESSION['detsuid']==0)) {
       <div class="table-responsive">
         <table class="table table-clean">
           <thead>
-            <tr><th>#</th><th>Date</th><th>Total</th></tr>
+            <tr><th>#</th><th>Year</th><th>Total</th></tr>
           </thead>
           <tbody>
             <?php if ($recordCount > 0) { $cnt = 1; foreach ($rows as $row) { ?>
             <tr>
               <td><?php echo $cnt; ?></td>
-              <td><?php echo date('F j, Y', strtotime($row['ExpenseDate'])); ?></td>
+              <td><?php echo $row['reportyear']; ?></td>
               <td><?php echo report_money($row['totalamount'], $currency); ?></td>
             </tr>
             <?php $cnt++; } } else { ?>
@@ -239,7 +243,6 @@ if (strlen($_SESSION['detsuid']==0)) {
       var values = <?php echo json_encode($values); ?>;
       var moneySuffix = <?php echo json_encode(' ' . report_currency_symbol($currency)); ?>;
       var isMobile = window.innerWidth < 768;
-
       if (!labels.length) return;
 
       function setChartHeight(id, count) {
@@ -285,10 +288,10 @@ if (strlen($_SESSION['detsuid']==0)) {
         });
       }
 
-      setChartHeight("dailyLineChartWrap", labels.length);
-      setChartHeight("dailyBarChartWrap", labels.length);
+      setChartHeight("yearLineChartWrap", labels.length);
+      setChartHeight("yearBarChartWrap", labels.length);
 
-      new Chart(document.getElementById("dailyLineChart").getContext("2d")).Line({
+      new Chart(document.getElementById("yearLineChart").getContext("2d")).Line({
         labels: slimLabels(labels),
         datasets: [{ fillColor: "rgba(37,99,235,0.14)", strokeColor: "rgba(37,99,235,1)", pointColor: "rgba(37,99,235,1)", pointStrokeColor: "#fff", data: values }]
       }, {
@@ -300,7 +303,7 @@ if (strlen($_SESSION['detsuid']==0)) {
         scaleFontSize: isMobile ? 10 : 12
       });
 
-      new Chart(document.getElementById("dailyBarChart").getContext("2d")).BarWithLabels({
+      new Chart(document.getElementById("yearBarChart").getContext("2d")).BarWithLabels({
         labels: slimLabels(labels),
         datasets: [{ fillColor: "rgba(15,23,42,0.85)", strokeColor: "rgba(15,23,42,1)", highlightFill: "rgba(30,41,59,1)", highlightStroke: "rgba(30,41,59,1)", data: values }]
       }, {
