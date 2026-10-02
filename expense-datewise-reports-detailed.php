@@ -1,8 +1,8 @@
 <?php
 session_start();
 error_reporting(0);
-include('includes/dbconnection.php');
-include('includes/report-helpers.php');
+include('config/database.php');
+include('src/report-helpers.php');
 if (strlen($_SESSION['detsuid']==0)) {
   header('location:logout.php');
 } else {
@@ -93,10 +93,10 @@ if (strlen($_SESSION['detsuid']==0)) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Daily Expense Tracker || Daily Expense Report</title>
-  <link href="css/bootstrap.min.css" rel="stylesheet">
-  <link href="css/font-awesome.min.css" rel="stylesheet">
-  <link href="css/datepicker3.css" rel="stylesheet">
-  <link href="css/styles.css" rel="stylesheet">
+  <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/font-awesome.min.css" rel="stylesheet">
+  <link href="assets/css/datepicker3.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
   <style>
     .report-shell { padding-top: 24px; padding-bottom: 32px; background: linear-gradient(180deg, #f8fafc 0%, #eef3f8 100%); min-height: 100vh; }
@@ -127,8 +127,8 @@ if (strlen($_SESSION['detsuid']==0)) {
   </style>
 </head>
 <body>
-  <?php include_once('includes/header.php');?>
-  <?php include_once('includes/sidebar.php');?>
+  <?php include_once('templates/header.php');?>
+  <?php include_once('templates/sidebar.php');?>
   <div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main report-shell">
     <div class="report-block">
       <h1 class="report-title">Daily report</h1>
@@ -227,12 +227,12 @@ if (strlen($_SESSION['detsuid']==0)) {
 
     <?php } ?>
   </div>
-  <script src="js/jquery-1.11.1.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/chart.min.js"></script>
-  <script src="js/chart-data.js"></script>
-  <script src="js/bootstrap-datepicker.js"></script>
-  <script src="js/custom.js"></script>
+  <script src="assets/js/jquery-1.11.1.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+  <script src="assets/js/chart.min.js"></script>
+  <script src="assets/js/chart-data.js"></script>
+  <script src="assets/js/bootstrap-datepicker.js"></script>
+  <script src="assets/js/custom.js"></script>
   <script>
     (function () {
       var labels = <?php echo json_encode($labels); ?>;

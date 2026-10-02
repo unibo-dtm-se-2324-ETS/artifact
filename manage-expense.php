@@ -1,8 +1,8 @@
 <?php
 session_start();
 error_reporting(0);
-include('includes/dbconnection.php');
-include('includes/expense-helpers.php');
+include('config/database.php');
+include('src/expense-helpers.php');
 
 if (strlen($_SESSION['detsuid']) == 0) {
   header('location:logout.php');
@@ -176,10 +176,10 @@ $exportLink = 'manage-expense.php?' . http_build_query($queryString);
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Daily Expense Tracker || Manage Expense</title>
-  <link href="css/bootstrap.min.css" rel="stylesheet">
-  <link href="css/font-awesome.min.css" rel="stylesheet">
-  <link href="css/datepicker3.css" rel="stylesheet">
-  <link href="css/styles.css" rel="stylesheet">
+  <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/font-awesome.min.css" rel="stylesheet">
+  <link href="assets/css/datepicker3.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
   <style>
     .expense-shell { padding-top: 24px; padding-bottom: 30px; background: linear-gradient(180deg, #f8fafc 0%, #eef3f8 100%); min-height: 100vh; }
@@ -198,8 +198,8 @@ $exportLink = 'manage-expense.php?' . http_build_query($queryString);
   </style>
 </head>
 <body>
-  <?php include_once('includes/header.php'); ?>
-  <?php include_once('includes/sidebar.php'); ?>
+  <?php include_once('templates/header.php'); ?>
+  <?php include_once('templates/sidebar.php'); ?>
 
   <div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main expense-shell">
     <div class="row">
@@ -354,13 +354,13 @@ $exportLink = 'manage-expense.php?' . http_build_query($queryString);
           </div>
         </div>
       </div>
-      <?php include_once('includes/footer.php'); ?>
+      <?php include_once('templates/footer.php'); ?>
     </div>
   </div>
 
-  <script src="js/jquery-1.11.1.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/bootstrap-datepicker.js"></script>
-  <script src="js/custom.js"></script>
+  <script src="assets/js/jquery-1.11.1.min.js"></script>
+  <script src="assets/js/bootstrap.min.js"></script>
+  <script src="assets/js/bootstrap-datepicker.js"></script>
+  <script src="assets/js/custom.js"></script>
 </body>
 </html>

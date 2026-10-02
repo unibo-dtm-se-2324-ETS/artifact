@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../../includes/expense-helpers.php';
+require_once __DIR__ . '/../../src/expense-helpers.php';
 
 final class ExpenseHelpersTest extends TestCase
 {

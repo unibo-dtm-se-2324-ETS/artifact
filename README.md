@@ -13,11 +13,15 @@ Expense Tracker System is a PHP and MySQL web application for recording personal
 
 ## Project Structure
 
-- Root `*.php` files contain the main application pages.
-- `includes/` contains database connection, layout includes, and shared helper functions.
-- `css/`, `js/`, `assets/`, and `fonts/` contain frontend resources.
+- Root `*.php` files are the application pages (kept at the web root so the URLs stay stable).
+- `src/` contains the shared business logic (expense and report helper functions).
+- `config/` contains the database connection settings.
+- `templates/` contains the shared layout pieces (header, sidebar, footer).
+- `assets/` contains the frontend resources (`css/`, `js/`, `fonts/`, `images/`, `plugins/`) and the Sass source.
+- `database/` contains the schema (`database.sql`) and the demo seed data.
 - `uploads/receipts/` stores uploaded receipt files.
-- `tests/` contains the unit tests, the browser end-to-end test, and the acceptance checklist.
+- `tests/` contains the unit tests and the browser end-to-end test.
+- `docs/` contains the acceptance checklist and the presentation material.
 - `.github/workflows/` contains CI/CD workflow definitions.
 
 ## Report
@@ -32,8 +36,8 @@ repository, so that there is only one copy of the document.
 2. Copy the project folder into `htdocs`.
 3. Start Apache and MySQL.
 4. Create the MySQL database.
-5. Import `database.sql`.
-6. Update `includes/dbconnection.php` if the local database credentials are different.
+5. Import `database/database.sql`.
+6. Update `config/database.php` if the local database credentials are different.
 7. Open `http://localhost/Expense-Tracker-System/` in a browser.
 
 ## Build And Checks

@@ -1,7 +1,7 @@
 <?php
 session_start();
 error_reporting(0);
-include('includes/dbconnection.php');
+include('config/database.php');
 error_reporting(0);
 
 if(isset($_POST['submit']))
@@ -25,9 +25,9 @@ session_destroy();
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Daily Expense Tracker - Forgot Reset</title>
-	<link href="css/bootstrap.min.css" rel="stylesheet">
-	<link href="css/datepicker3.css" rel="stylesheet">
-	<link href="css/styles.css" rel="stylesheet">
+	<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+	<link href="assets/css/datepicker3.css" rel="stylesheet">
+	<link href="assets/css/styles.css" rel="stylesheet">
 	<script type="text/javascript">
 function checkpass()
 {
@@ -76,7 +76,7 @@ return true;
 	</div><!-- /.row -->	
 	
 
-<script src="js/jquery-1.11.1.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
+<script src="assets/js/jquery-1.11.1.min.js"></script>
+	<script src="assets/js/bootstrap.min.js"></script>
 </body>
 </html>

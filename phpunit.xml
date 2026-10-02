@@ -10,8 +10,8 @@
   </testsuites>
   <source>
     <include>
-      <file>includes/expense-helpers.php</file>
-      <file>includes/report-helpers.php</file>
+      <file>src/expense-helpers.php</file>
+      <file>src/report-helpers.php</file>
     </include>
   </source>
   <coverage includeUncoveredFiles="true">

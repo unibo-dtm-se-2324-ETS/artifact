@@ -6,7 +6,7 @@ $root = __DIR__;
 $outDir = $root . '/build';
 $zipPath = $outDir . '/expense-tracker.zip';
 
-$excludedDirs = ['.git', '.github', '.phpunit.cache', '.tmp-reportrepo-sync', 'build', 'node_modules', 'tests', 'tmp', 'vendor'];
+$excludedDirs = ['.git', '.github', '.phpunit.cache', '.tmp-reportrepo-sync', 'build', 'node_modules', 'docs', 'tests', 'tmp', 'vendor'];
 $excludedFiles = ['.gitignore', 'composer.lock', 'phpunit.xml', 'requirements-dev.txt'];
 $excludedExtensions = ['pdf', 'pptx'];
 
