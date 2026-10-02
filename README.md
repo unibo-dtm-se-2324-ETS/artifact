@@ -26,9 +26,6 @@ The software engineering report is maintained in a separate repository and publi
 <https://unibo-dtm-se-2324-ets.github.io/report/>. It is deliberately not kept in this
 repository, so that there is only one copy of the document.
 
-Parts of this project were produced with the help of an AI coding assistant. The scope of
-that assistance is declared on the home page of the report.
-
 ## Local Deployment
 
 1. Install XAMPP.
