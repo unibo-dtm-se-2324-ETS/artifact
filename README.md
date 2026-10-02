@@ -73,6 +73,18 @@ composer test:coverage
 
 The release package can be built locally with `composer build`, which writes `build/expense-tracker.zip`.
 
+### PHP test coverage
+
+Measured with PHPUnit and PCOV (78 tests, all passing), 2 October 2026:
+
+| File | Statements | Methods | Covered statements |
+|---|---|---|---|
+| `src/expense-helpers.php` | 87.1% | 100.0% | 182/209 |
+| `src/report-helpers.php` | 80.8% | 100.0% | 21/26 |
+| **Total** | **86.4%** | **100.0%** | **203/235** |
+
+The table is regenerated on every push by the CI workflow and appears on the run's Summary page on GitHub; the full HTML report is attached to the run as the `coverage-report` artifact. The page files are not part of the unit-test coverage and are checked by the browser test below.
+
 Playwright full-site browser tests can be run with:
 
 ```bash
