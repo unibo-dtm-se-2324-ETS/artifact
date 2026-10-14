@@ -50,6 +50,7 @@ repository, so that there is only one copy of the document.
 
 - PHP syntax check workflow: `.github/workflows/main.yml`
 - CI workflow (`.github/workflows/php.yml`): validates Composer files, lints, runs the unit tests with a pcov code coverage report (uploaded as the `coverage-report` artifact), runs the Playwright browser test against the app with a MySQL service, then builds the release package (`expense-tracker.zip`) once both pass
+- Release workflow (`.github/workflows/release.yml`): pushing a version tag such as `v1.0.0` builds the package and publishes it as a GitHub Release with generated release notes
 
 Locally, selected syntax checks can be run with:
 

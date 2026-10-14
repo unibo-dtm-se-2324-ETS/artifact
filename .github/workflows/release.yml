@@ -1,0 +1,39 @@
+name: Release
+
+# Publishes a GitHub Release with the packaged application whenever a version
+# tag such as v1.0.0 is pushed.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+
+      - name: Build package
+        run: php build.php
+
+      - name: Name the package after the version
+        run: mv build/expense-tracker.zip "build/expense-tracker-${GITHUB_REF_NAME}.zip"
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "build/expense-tracker-${GITHUB_REF_NAME}.zip" \
+            --title "Expense Tracker ${GITHUB_REF_NAME}" \
+            --generate-notes
