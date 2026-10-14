@@ -108,6 +108,10 @@ $env:RUN_REPORT_CHECK="1"
 python tests/e2e/playwright_smoke.py
 ```
 
+## Versioning And Contributing
+
+The current version is stored in `VERSION` and follows [Semantic Versioning](https://semver.org/). Changes are listed in [CHANGELOG.md](CHANGELOG.md). The commit format, the branch and pull request workflow and how to run the tests are described in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## License
 
 This project is released under the MIT License.
