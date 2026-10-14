@@ -1,8 +1,19 @@
 <?php
 // Prints a Markdown coverage table from a Clover XML report.
-// Usage: php scripts/coverage-summary.php build/coverage/clover.xml
+// Usage: php scripts/coverage-summary.php [clover.xml] [--min=80]
+// With --min, the script exits with status 1 when the statement coverage is below that percentage.
 
-$path = $argv[1] ?? 'build/coverage/clover.xml';
+$minimum = null;
+$args = array();
+foreach (array_slice($argv, 1) as $arg) {
+    if (strpos($arg, '--min=') === 0) {
+        $minimum = (float) substr($arg, 6);
+    } else {
+        $args[] = $arg;
+    }
+}
+
+$path = $args[0] ?? 'build/coverage/clover.xml';
 if (!is_file($path)) {
     fwrite(STDERR, "Coverage report not found: $path\n");
     exit(1);
@@ -36,3 +47,13 @@ printf(
     (int) $t['coveredstatements'],
     (int) $t['statements']
 );
+
+if ($minimum !== null) {
+    $total = (int) $t['statements'];
+    $actual = $total === 0 ? 100.0 : 100 * (int) $t['coveredstatements'] / $total;
+    if ($actual < $minimum) {
+        fwrite(STDERR, sprintf("Coverage %.1f%% is below the required minimum of %.1f%%.
+", $actual, $minimum));
+        exit(1);
+    }
+}

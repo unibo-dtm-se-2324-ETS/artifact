@@ -9,6 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Added
 - `CHANGELOG.md`, `CONTRIBUTING.md` and a `VERSION` file.
+- CI now fails when the statement coverage drops below 80%.
 
 ## [1.0.0] - 2026-10-14
 
