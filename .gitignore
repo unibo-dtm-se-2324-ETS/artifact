@@ -7,3 +7,4 @@ tests/e2e/artifacts/
 .tmp-reportrepo-sync/
 build/
 .sass-cache/
+tmp/

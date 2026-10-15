@@ -7,6 +7,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Changed
+- Tests are split into `tests/unit`, `tests/integration` and `tests/e2e`.
+- `build.php` moved to `scripts/build.php`; the Sass source moved to `resources/sass/`.
+- Presentations moved to `docs/presentations/`.
+- Added `.editorconfig` and `.gitattributes`.
+
+### Removed
+- Unused third-party code: `public/assets/plugins/` and unreferenced CSS and JS files.
+
 ## [1.1.0] - 2026-10-16
 
 ### Added

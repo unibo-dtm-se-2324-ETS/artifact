@@ -15,17 +15,24 @@ Expense Tracker System is a PHP and MySQL web application for recording personal
 
 ```text
 Expense-Tracker-System/
-├── public/        Web root: the application pages, assets/ (css, js, fonts, images, plugins) and uploads/
-├── src/           Business logic: expense and report helper functions
-├── config/        Database connection settings
-├── templates/     Shared layout pieces (header, sidebar, footer)
-├── database/      Schema (database.sql) and demo seed data
-├── tests/         Unit tests and the browser end-to-end test
-├── docs/          Acceptance checklist and presentation material
-├── .github/       CI workflows (syntax check, tests + coverage, build)
-├── build.php      Builds the release package (composer build)
-├── index.php      Redirects the old address to public/
-└── composer.json  Dependencies and scripts (lint, test, test:coverage, build)
+├── public/          Web root: application pages, assets/ (css, js, fonts, images), uploads/
+├── src/             Business logic: expense and report helper functions
+├── config/          Database connection settings
+├── templates/       Shared layout pieces (header, sidebar, footer)
+├── database/        Schema (database.sql) and demo seed data
+├── resources/       Source files that are not served (Sass)
+├── scripts/         Developer tooling: build.php, coverage-summary.php
+├── tests/
+│   ├── unit/        Unit tests and PHP syntax checks
+│   ├── integration/ Database tests (separate detsdb_test database)
+│   └── e2e/         Playwright browser test
+├── docs/            Acceptance checklist and presentations
+├── .github/         CI workflows (CI, PHP syntax check, release)
+├── index.php        Redirects the old address to public/
+├── composer.json    Dependencies and scripts (lint, test, test:coverage, build)
+├── VERSION          Current version (Semantic Versioning)
+├── CHANGELOG.md     History of changes
+└── CONTRIBUTING.md  Commit format, branch workflow, how to run the tests
 ```
 
 Uploaded receipts are stored in `public/uploads/receipts/`.
@@ -76,7 +83,7 @@ The release package can be built locally with `composer build`, which writes `bu
 
 ### PHP test coverage
 
-Measured with PHPUnit and PCOV (78 tests, all passing), 2 October 2026:
+Measured with PHPUnit and PCOV (80 tests, all passing), 16 October 2026:
 
 | File | Statements | Methods | Covered statements |
 |---|---|---|---|

@@ -4,8 +4,11 @@
          colors="true"
          cacheDirectory=".phpunit.cache">
   <testsuites>
-    <testsuite name="Expense Tracker Unit Tests">
+    <testsuite name="Unit">
       <directory>tests/unit</directory>
+    </testsuite>
+    <testsuite name="Integration">
+      <directory>tests/integration</directory>
     </testsuite>
   </testsuites>
   <source>
