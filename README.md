@@ -83,13 +83,14 @@ The release package can be built locally with `composer build`, which writes `bu
 
 ### PHP test coverage
 
-Measured with PHPUnit and PCOV (80 tests, all passing), 16 October 2026:
+Measured with PHPUnit and PCOV (113 tests, all passing), 17 October 2026:
 
 | File | Statements | Methods | Covered statements |
 |---|---|---|---|
 | `src/expense-helpers.php` | 87.1% | 100.0% | 182/209 |
+| `src/expense-service.php` | 90.5% | 100.0% | 114/126 |
 | `src/report-helpers.php` | 80.8% | 100.0% | 21/26 |
-| **Total** | **86.4%** | **100.0%** | **203/235** |
+| **Total** | **87.8%** | **100.0%** | **317/361** |
 
 The table is regenerated on every push by the CI workflow and appears on the run's Summary page on GitHub; the full HTML report is attached to the run as the `coverage-report` artifact. The page files are not part of the unit-test coverage and are checked by the browser test below.
 

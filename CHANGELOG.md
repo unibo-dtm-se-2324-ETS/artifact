@@ -7,7 +7,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- `src/expense-service.php`: validation, filtering, CSV rows and the create, find, update, delete and
+  search operations for expenses, moved out of the pages and covered by 32 new tests. It was built
+  test-first: the failing tests were committed before the implementation.
+- The browser test now also checks the CSV export and the edit and delete flows.
+- Test coverage is now 87.8% (317 of 361 statements).
+
+### Fixed
+- Deleting an expense reports failure when nothing was deleted, so another user's expense or an
+  unknown id is no longer reported as deleted.
+
 ### Changed
+- `add-expense.php`, `edit-expense.php` and `manage-expense.php` use the expense service; the
+  duplicated validation and SQL are gone.
 - Tests are split into `tests/unit`, `tests/integration` and `tests/e2e`.
 - `build.php` moved to `scripts/build.php`; the Sass source moved to `resources/sass/`.
 - Presentations moved to `docs/presentations/`.
