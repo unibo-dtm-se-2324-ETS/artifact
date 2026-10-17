@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../../src/expense-helpers.php';
@@ -25,9 +26,7 @@ final class ExpenseServiceTest extends TestCase
         $this->assertSame('', expense_validate_form($this->validForm(), 5));
     }
 
-    /**
-     * @dataProvider invalidFormProvider
-     */
+    #[DataProvider('invalidFormProvider')]
     public function testInvalidFormReturnsTheMatchingMessage(array $changes, int $categoryId, string $expected): void
     {
         $form = array_merge($this->validForm(), $changes);
@@ -111,7 +110,7 @@ final class ExpenseServiceTest extends TestCase
 
         $query = expense_filter_query(1, $filters);
 
-        $this->assertSame('ississsdd', $query['types']);
+        $this->assertSame('isssissdd', $query['types']);
         $this->assertSame(array(1, '%tea%', '%tea%', 'EUR', 3, '2026-01-01', '2026-01-31', 2.0, 9.5), $query['params']);
         $this->assertStringContainsString('e.ExpenseItem LIKE ? OR e.Notes LIKE ?', $query['sql']);
         $this->assertStringContainsString('e.ExpenseCost<=?', $query['sql']);

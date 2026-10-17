@@ -44,7 +44,7 @@ final class ExpenseServiceDatabaseTest extends DatabaseTestCase
         $this->assertSame('Coffee', $expense['ExpenseItem']);
         $this->assertSame('3.50', $expense['ExpenseCost']);
         $this->assertSame('EUR', $expense['Currency']);
-        $this->assertSame('4', $expense['CategoryId']);
+        $this->assertSame(4, $expense['CategoryId']);
         $this->assertSame('with milk', $expense['Notes']);
         $this->assertSame('uploads/receipts/r.pdf', $expense['ReceiptPath']);
         $this->assertSame('2026-05-16', $expense['ExpenseDate']);
@@ -69,7 +69,7 @@ final class ExpenseServiceDatabaseTest extends DatabaseTestCase
         $expense = expense_find(self::$con, 1, $id);
         $this->assertSame('New', $expense['ExpenseItem']);
         $this->assertSame('12.00', $expense['ExpenseCost']);
-        $this->assertSame('6', $expense['CategoryId']);
+        $this->assertSame(6, $expense['CategoryId']);
     }
 
     public function testUpdateDoesNotChangeAnotherUsersExpense(): void
@@ -144,7 +144,7 @@ final class ExpenseServiceDatabaseTest extends DatabaseTestCase
         $this->insertExpense(1, 'B', 50, '2026-05-10', '2026-05-10 08:00:00', 'EUR', 2);
         $this->insertExpense(1, 'C', 500, '2026-05-20', '2026-05-20 08:00:00', 'EUR', 2);
 
-        $this->assertSame(array('B', 'C'), array_column(expense_search(self::$con, 1, expense_normalize_filters(array('currency' => 'EUR'))), 'ExpenseItem'));
+        $this->assertSame(array('C', 'B'), array_column(expense_search(self::$con, 1, expense_normalize_filters(array('currency' => 'EUR'))), 'ExpenseItem'));
         $this->assertSame(array('A'), array_column(expense_search(self::$con, 1, expense_normalize_filters(array('categoryid' => '1'))), 'ExpenseItem'));
         $this->assertSame(array('B'), array_column(expense_search(self::$con, 1, expense_normalize_filters(array('minamount' => '10', 'maxamount' => '100'))), 'ExpenseItem'));
         $this->assertSame(array('B'), array_column(expense_search(self::$con, 1, expense_normalize_filters(array('fromdate' => '2026-05-05', 'todate' => '2026-05-15'))), 'ExpenseItem'));

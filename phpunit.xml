@@ -15,6 +15,7 @@
     <include>
       <file>src/expense-helpers.php</file>
       <file>src/report-helpers.php</file>
+      <file>src/expense-service.php</file>
     </include>
   </source>
   <coverage includeUncoveredFiles="true">
