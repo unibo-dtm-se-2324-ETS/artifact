@@ -2,6 +2,8 @@
 session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
+include_once(__DIR__ . '/../src/expense-helpers.php');
+include_once(__DIR__ . '/../src/account-service.php');
 ?>
 <?php
 $currentPage = basename($_SERVER['PHP_SELF']);
@@ -26,10 +28,8 @@ $reportPages = array(
             </div>
             <div class="profile-usertitle">
                 <?php
-$uid=$_SESSION['detsuid'];
-$ret=mysqli_query($con,"select FullName from tbluser where ID='$uid'");
-$row=mysqli_fetch_array($ret);
-$name=$row['FullName'];
+$uid=(int)$_SESSION['detsuid'];
+$name=profile_full_name($con, $uid);
 
 ?>
                 <div class="profile-usertitle-name"><?php echo $name; ?></div>

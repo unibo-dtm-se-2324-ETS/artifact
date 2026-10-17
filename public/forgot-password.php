@@ -2,15 +2,15 @@
 session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/account-service.php');
 
 if(isset($_POST['submit']))
   {
-    $contactno=$_POST['contactno'];
-    $email=$_POST['email'];
+    $contactno = isset($_POST['contactno']) ? $_POST['contactno'] : '';
+    $email = isset($_POST['email']) ? $_POST['email'] : '';
 
-        $query=mysqli_query($con,"select ID from tbluser where  Email='$email' and MobileNumber='$contactno' ");
-    $ret=mysqli_fetch_array($query);
-    if($ret>0){
+    if(auth_find_user_by_contact($con, $email, $contactno) > 0){
       $_SESSION['contactno']=$contactno;
       $_SESSION['email']=$email;
      header('location:reset-password.php');

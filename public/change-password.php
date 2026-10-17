@@ -1,30 +1,23 @@
 <?php
 session_start();
 include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/account-service.php');
 error_reporting(0);
 if (strlen($_SESSION['detsuid']==0)) {
   header('location:logout.php');
   } else{
 if(isset($_POST['submit']))
 {
-$userid=$_SESSION['detsuid'];
-$cpassword=md5($_POST['currentpassword']);
-$newpassword=md5($_POST['newpassword']);
-$query=mysqli_query($con,"select ID from tbluser where ID='$userid' and   Password='$cpassword'");
-$row=mysqli_fetch_array($query);
-if($row>0){
-$ret=mysqli_query($con,"update tbluser set Password='$newpassword' where ID='$userid'");
-$msg= "Your password successully changed"; 
+$userid=(int)$_SESSION['detsuid'];
+if (auth_change_password($con, $userid, isset($_POST['currentpassword']) ? $_POST['currentpassword'] : '', isset($_POST['newpassword']) ? $_POST['newpassword'] : '')) {
+$msg= "Your password successully changed";
 } else {
-
 $msg="Your current password is wrong";
 }
-
-
-
 }
 
-  
+
   ?>
 <!DOCTYPE html>
 <html>
@@ -83,10 +76,9 @@ return true;
   }  ?> </p>
 						<div class="col-md-12">
 							 <?php
-$userid=$_SESSION['detsuid'];
-$ret=mysqli_query($con,"select * from tbluser where ID='$userid'");
-$cnt=1;
-while ($row=mysqli_fetch_array($ret)) {
+$userid=(int)$_SESSION['detsuid'];
+$accountRows=array_filter(array(profile_get($con, $userid)));
+foreach ($accountRows as $row) {
 
 ?>
 							<form role="form" method="post" action="" name="changepassword" onsubmit="return checkpass();">

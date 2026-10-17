@@ -3,6 +3,7 @@ session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
 include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/account-service.php');
 
 if (strlen($_SESSION['detsuid']) == 0) {
   header('location:logout.php');
@@ -19,41 +20,19 @@ expense_ensure_user_categories($con, $userid);
 $csrfToken = expense_csrf_token();
 $categories = expense_get_categories($con, $userid);
 
-$profile = expense_fetch_one_assoc(expense_prepare_and_execute($con, "SELECT FullName, Email, MobileNumber, RegDate, DefaultCurrency, DefaultCategoryId FROM tbluser WHERE ID=? LIMIT 1", 'i', array($userid)));
-
-$form = array(
-  'fullname' => $profile ? $profile['FullName'] : '',
-  'contactnumber' => $profile ? $profile['MobileNumber'] : '',
-  'defaultcurrency' => $profile ? expense_selected_currency($profile['DefaultCurrency']) : 'USD',
-  'defaultcategoryid' => $profile && $profile['DefaultCategoryId'] ? (string)$profile['DefaultCategoryId'] : ''
-);
+$profile = profile_get($con, $userid);
+$form = profile_form_defaults($profile);
 
 if (isset($_POST['submit'])) {
-  $form['fullname'] = isset($_POST['fullname']) ? trim($_POST['fullname']) : '';
-  $form['contactnumber'] = isset($_POST['contactnumber']) ? trim($_POST['contactnumber']) : '';
-  $form['defaultcurrency'] = expense_selected_currency(isset($_POST['defaultcurrency']) ? $_POST['defaultcurrency'] : 'USD');
-  $form['defaultcategoryid'] = isset($_POST['defaultcategoryid']) ? trim($_POST['defaultcategoryid']) : '';
-  $defaultCategoryId = (int)$form['defaultcategoryid'];
+  $form = profile_form_from_input($_POST);
 
   if (!expense_verify_csrf(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '')) {
     $msg = 'Your session expired. Please try again.';
-  } elseif ($form['fullname'] == '') {
-    $msg = 'Full name is required.';
-  } elseif ($defaultCategoryId > 0 && !expense_find_category_by_id($con, $userid, $defaultCategoryId)) {
-    $msg = 'The selected default category is invalid.';
   } else {
-    $stmt = expense_prepare_and_execute(
-      $con,
-      "UPDATE tbluser SET FullName=?, MobileNumber=?, DefaultCurrency=?, DefaultCategoryId=? WHERE ID=?",
-      'sssii',
-      array($form['fullname'], $form['contactnumber'], $form['defaultcurrency'], $defaultCategoryId, $userid)
-    );
-    if ($stmt) {
-      expense_close_statement($stmt);
+    $msg = profile_update($con, $userid, $form);
+    if ($msg === '') {
       $success = 'Profile and defaults updated successfully.';
-      $profile = expense_fetch_one_assoc(expense_prepare_and_execute($con, "SELECT FullName, Email, MobileNumber, RegDate, DefaultCurrency, DefaultCategoryId FROM tbluser WHERE ID=? LIMIT 1", 'i', array($userid)));
-    } else {
-      $msg = 'Something went wrong. Please try again.';
+      $profile = profile_get($con, $userid);
     }
   }
 }
