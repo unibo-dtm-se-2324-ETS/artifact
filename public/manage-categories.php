@@ -3,6 +3,7 @@ session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
 include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/category-service.php');
 
 if (strlen($_SESSION['detsuid']) == 0) {
   header('location:logout.php');
@@ -31,147 +32,49 @@ if (isset($_POST['add_category']) || isset($_POST['update_category']) || isset($
   }
 }
 
+$result = null;
+
 if ($msg == '' && isset($_POST['add_category'])) {
-  $categoryName = trim(isset($_POST['category_name']) ? $_POST['category_name'] : '');
-  if ($categoryName == '') {
-    $msg = 'Category name is required.';
-  } else {
-    $exists = expense_fetch_one_assoc(expense_prepare_and_execute($con, "SELECT ID FROM tblcategories WHERE UserId=? AND CategoryName=? LIMIT 1", 'is', array($userid, $categoryName)));
-    if ($exists) {
-      $msg = 'This category already exists.';
-    } else {
-      $stmt = expense_prepare_and_execute($con, "INSERT INTO tblcategories (UserId, CategoryName) VALUES (?, ?)", 'is', array($userid, $categoryName));
-      if ($stmt) {
-        expense_close_statement($stmt);
-        $success = 'Category added successfully.';
-      } else {
-        $msg = 'Unable to add category right now.';
-      }
-    }
-  }
+  $result = category_add($con, $userid, isset($_POST['category_name']) ? $_POST['category_name'] : '');
 }
 
 if ($msg == '' && isset($_POST['update_category'])) {
-  $categoryId = (int)$_POST['category_id'];
-  $categoryName = trim(isset($_POST['category_name']) ? $_POST['category_name'] : '');
-  if ($categoryId <= 0 || $categoryName == '') {
-    $msg = 'A valid category is required.';
-  } else {
-    $exists = expense_fetch_one_assoc(expense_prepare_and_execute($con, "SELECT ID FROM tblcategories WHERE UserId=? AND CategoryName=? AND ID<>? LIMIT 1", 'isi', array($userid, $categoryName, $categoryId)));
-    if ($exists) {
-      $msg = 'This category already exists.';
-    } else {
-      $stmt = expense_prepare_and_execute($con, "UPDATE tblcategories SET CategoryName=? WHERE ID=? AND UserId=?", 'sii', array($categoryName, $categoryId, $userid));
-      if ($stmt) {
-        expense_close_statement($stmt);
-        $success = 'Category updated successfully.';
-        $editCategory = null;
-      } else {
-        $msg = 'Unable to update this category.';
-      }
-    }
+  $result = category_rename($con, $userid, (int)$_POST['category_id'], isset($_POST['category_name']) ? $_POST['category_name'] : '');
+  if ($result['ok']) {
+    $editCategory = null;
   }
 }
 
 if ($msg == '' && isset($_POST['delete_category'])) {
   $categoryId = (int)$_POST['category_id'];
-  $expenseUse = expense_fetch_one_assoc(expense_prepare_and_execute($con, "SELECT COUNT(*) AS total FROM tblexpense WHERE UserId=? AND CategoryId=?", 'ii', array($userid, $categoryId)));
-  $budgetUse = expense_fetch_one_assoc(expense_prepare_and_execute($con, "SELECT COUNT(*) AS total FROM tblbudgets WHERE UserId=? AND CategoryId=?", 'ii', array($userid, $categoryId)));
-  if (($expenseUse && (int)$expenseUse['total'] > 0) || ($budgetUse && (int)$budgetUse['total'] > 0)) {
-    $msg = 'This category is already used by expenses or budgets, so it cannot be deleted.';
-  } else {
-    $stmt = expense_prepare_and_execute($con, "DELETE FROM tblcategories WHERE ID=? AND UserId=?", 'ii', array($categoryId, $userid));
-    if ($stmt) {
-      expense_close_statement($stmt);
-      $success = 'Category deleted successfully.';
-      if ($editCategory && (int)$editCategory['ID'] === $categoryId) {
-        $editCategory = null;
-      }
-    } else {
-      $msg = 'Unable to delete this category.';
-    }
+  $result = category_remove($con, $userid, $categoryId);
+  if ($result['ok'] && $editCategory && (int)$editCategory['ID'] === $categoryId) {
+    $editCategory = null;
   }
 }
 
 if ($msg == '' && isset($_POST['save_budget'])) {
-  $categoryId = (int)$_POST['budget_category_id'];
   $selectedMonth = expense_month_key(isset($_POST['budget_month']) ? $_POST['budget_month'] . '-01' : null);
   $selectedCurrency = expense_selected_currency(isset($_POST['currency']) ? $_POST['currency'] : 'USD');
-  $budgetAmount = trim(isset($_POST['budget_amount']) ? $_POST['budget_amount'] : '');
-
-  if ($categoryId <= 0) {
-    $msg = 'Please choose a category for the budget.';
-  } elseif ($budgetAmount == '' || !is_numeric($budgetAmount) || (float)$budgetAmount <= 0) {
-    $msg = 'Please enter a valid budget amount greater than zero.';
-  } else {
-    $category = expense_find_category_by_id($con, $userid, $categoryId);
-    if (!$category) {
-      $msg = 'The selected category is invalid.';
-    } else {
-      $existingBudget = expense_fetch_one_assoc(expense_prepare_and_execute($con, "SELECT ID FROM tblbudgets WHERE UserId=? AND CategoryId=? AND BudgetMonth=? AND Currency=? LIMIT 1", 'iiss', array($userid, $categoryId, $selectedMonth, $selectedCurrency)));
-      $amount = (float)$budgetAmount;
-      if ($existingBudget) {
-        $stmt = expense_prepare_and_execute($con, "UPDATE tblbudgets SET BudgetAmount=? WHERE ID=? AND UserId=?", 'dii', array($amount, $existingBudget['ID'], $userid));
-      } else {
-        $stmt = expense_prepare_and_execute($con, "INSERT INTO tblbudgets (UserId, CategoryId, BudgetMonth, Currency, BudgetAmount) VALUES (?, ?, ?, ?, ?)", 'iissd', array($userid, $categoryId, $selectedMonth, $selectedCurrency, $amount));
-      }
-
-      if ($stmt) {
-        expense_close_statement($stmt);
-        $success = 'Budget saved successfully.';
-      } else {
-        $msg = 'Unable to save this budget.';
-      }
-    }
-  }
+  $result = budget_save($con, $userid, (int)$_POST['budget_category_id'], $selectedMonth, $selectedCurrency, isset($_POST['budget_amount']) ? $_POST['budget_amount'] : '');
 }
 
 if ($msg == '' && isset($_POST['delete_budget'])) {
-  $budgetId = (int)$_POST['budget_id'];
-  $stmt = expense_prepare_and_execute($con, "DELETE FROM tblbudgets WHERE ID=? AND UserId=?", 'ii', array($budgetId, $userid));
-  if ($stmt) {
-    expense_close_statement($stmt);
-    $success = 'Budget deleted successfully.';
+  $result = budget_remove($con, $userid, (int)$_POST['budget_id']);
+}
+
+if ($result !== null) {
+  if ($result['ok']) {
+    $success = $result['message'];
   } else {
-    $msg = 'Unable to delete this budget.';
+    $msg = $result['message'];
   }
 }
 
 $monthStart = $selectedMonth . '-01';
 $monthEnd = date('Y-m-t', strtotime($monthStart));
-$categories = expense_fetch_all_assoc(
-  expense_prepare_and_execute(
-    $con,
-    "SELECT c.ID, c.CategoryName,
-      COALESCE(SUM(CASE WHEN e.ExpenseDate BETWEEN ? AND ? AND e.Currency=? THEN e.ExpenseCost ELSE 0 END), 0) AS month_spent,
-      (
-        SELECT b.BudgetAmount
-        FROM tblbudgets b
-        WHERE b.UserId=c.UserId AND b.CategoryId=c.ID AND b.BudgetMonth=? AND b.Currency=?
-        LIMIT 1
-      ) AS month_budget
-     FROM tblcategories c
-     LEFT JOIN tblexpense e ON e.CategoryId=c.ID AND e.UserId=c.UserId
-     WHERE c.UserId=?
-     GROUP BY c.ID, c.CategoryName
-     ORDER BY c.CategoryName ASC",
-    'sssssi',
-    array($monthStart, $monthEnd, $selectedCurrency, $selectedMonth, $selectedCurrency, $userid)
-  )
-);
-
-$budgets = expense_fetch_all_assoc(
-  expense_prepare_and_execute(
-    $con,
-    "SELECT b.ID, b.BudgetMonth, b.Currency, b.BudgetAmount, c.CategoryName
-     FROM tblbudgets b
-     INNER JOIN tblcategories c ON c.ID=b.CategoryId AND c.UserId=b.UserId
-     WHERE b.UserId=? AND b.BudgetMonth=? AND b.Currency=?
-     ORDER BY c.CategoryName ASC",
-    'iss',
-    array($userid, $selectedMonth, $selectedCurrency)
-  )
-);
+$categories = category_overview($con, $userid, $selectedMonth, $selectedCurrency);
+$budgets = budget_list($con, $userid, $selectedMonth, $selectedCurrency);
 ?>
 <!DOCTYPE html>
 <html>

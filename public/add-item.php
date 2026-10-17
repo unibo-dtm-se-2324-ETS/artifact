@@ -2,84 +2,48 @@
 session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/item-service.php');
 if (strlen($_SESSION['detsuid'] == 0)) {
   header('location:logout.php');
 } else {
-  $userid = $_SESSION['detsuid'];
+  $userid = (int)$_SESSION['detsuid'];
   $msg = "";
   $editItem = null;
 
-  mysqli_query($con, "CREATE TABLE IF NOT EXISTS tblitems (
-    ID int(11) NOT NULL AUTO_INCREMENT,
-    UserId int(11) NOT NULL,
-    ItemName varchar(150) NOT NULL,
-    CreatedAt timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (ID),
-    KEY idx_userid (UserId)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+  expense_ensure_schema($con);
 
   if (isset($_GET['editid'])) {
-    $editid = intval($_GET['editid']);
-    $editQuery = mysqli_query($con, "SELECT ID, ItemName FROM tblitems WHERE ID='$editid' AND UserId='$userid'");
-    $editItem = mysqli_fetch_array($editQuery);
+    $editItem = item_find($con, $userid, (int)$_GET['editid']);
     if (!$editItem) {
       $msg = "Item not found.";
     }
   }
 
   if (isset($_POST['submit'])) {
-    $itemname = trim($_POST['itemname']);
-    if ($itemname == "") {
-      $msg = "Item name is required.";
+    $result = item_add($con, $userid, isset($_POST['itemname']) ? $_POST['itemname'] : '');
+    if ($result['ok']) {
+      echo "<script>alert('Item added successfully');</script>";
+      echo "<script>window.location.href='add-item.php'</script>";
     } else {
-      $itemname = mysqli_real_escape_string($con, $itemname);
-      $check = mysqli_query($con, "SELECT ID FROM tblitems WHERE UserId='$userid' AND ItemName='$itemname'");
-      if (mysqli_num_rows($check) > 0) {
-        $msg = "This item already exists.";
-      } else {
-        $query = mysqli_query($con, "INSERT INTO tblitems(UserId, ItemName) VALUES('$userid', '$itemname')");
-        if ($query) {
-          echo "<script>alert('Item added successfully');</script>";
-          echo "<script>window.location.href='add-item.php'</script>";
-        } else {
-          $msg = "Something went wrong. Please try again.";
-        }
-      }
+      $msg = $result['message'];
     }
   }
 
   if (isset($_POST['update'])) {
-    $itemid = intval($_POST['itemid']);
-    $itemname = trim($_POST['itemname']);
-
-    if ($itemname == "") {
-      $msg = "Item name is required.";
+    $itemid = isset($_POST['itemid']) ? (int)$_POST['itemid'] : 0;
+    $result = item_rename($con, $userid, $itemid, isset($_POST['itemname']) ? $_POST['itemname'] : '');
+    if ($result['ok']) {
+      echo "<script>alert('Item updated successfully');</script>";
+      echo "<script>window.location.href='add-item.php'</script>";
     } else {
-      $itemname = mysqli_real_escape_string($con, $itemname);
-      $check = mysqli_query($con, "SELECT ID FROM tblitems WHERE UserId='$userid' AND ItemName='$itemname' AND ID!='$itemid'");
-      if (mysqli_num_rows($check) > 0) {
-        $msg = "This item already exists.";
-      } else {
-        $query = mysqli_query($con, "UPDATE tblitems SET ItemName='$itemname' WHERE ID='$itemid' AND UserId='$userid'");
-        if ($query) {
-          echo "<script>alert('Item updated successfully');</script>";
-          echo "<script>window.location.href='add-item.php'</script>";
-        } else {
-          $msg = "Something went wrong. Please try again.";
-        }
-      }
-    }
-
-    if ($msg != "") {
-      $editQuery = mysqli_query($con, "SELECT ID, ItemName FROM tblitems WHERE ID='$itemid' AND UserId='$userid'");
-      $editItem = mysqli_fetch_array($editQuery);
+      $msg = $result['message'];
+      $editItem = item_find($con, $userid, $itemid);
     }
   }
 
   if (isset($_GET['delid'])) {
-    $delid = intval($_GET['delid']);
-    $deleteQuery = mysqli_query($con, "DELETE FROM tblitems WHERE ID='$delid' AND UserId='$userid'");
-    if ($deleteQuery) {
+    if (item_delete($con, $userid, (int)$_GET['delid'])) {
       echo "<script>alert('Item deleted successfully');</script>";
       echo "<script>window.location.href='add-item.php'</script>";
     } else {
@@ -152,13 +116,12 @@ if (strlen($_SESSION['detsuid'] == 0)) {
                   </thead>
                   <tbody>
                     <?php
-                    $ret = mysqli_query($con, "SELECT * FROM tblitems WHERE UserId='$userid' ORDER BY ItemName ASC");
                     $cnt = 1;
-                    while ($row = mysqli_fetch_array($ret)) {
+                    foreach (item_list($con, $userid) as $row) {
                     ?>
                     <tr>
                       <td><?php echo $cnt; ?></td>
-                      <td><?php echo $row['ItemName']; ?></td>
+                      <td><?php echo expense_h($row['ItemName']); ?></td>
                       <td><?php echo $row['CreatedAt']; ?></td>
                       <td>
                         <a class="btn btn-xs btn-info" href="add-item.php?editid=<?php echo $row['ID']; ?>">
