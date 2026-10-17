@@ -2,15 +2,13 @@
 session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
 include(__DIR__ . '/../src/report-helpers.php');
 if (strlen($_SESSION['detsuid']==0)) {
   header('location:logout.php');
 } else {
   $currencyOptions = report_currency_options();
-  $selectedCurrency = isset($_GET['cur']) ? strtoupper($_GET['cur']) : 'USD';
-  if (!in_array($selectedCurrency, $currencyOptions)) {
-    $selectedCurrency = 'USD';
-  }
+  $selectedCurrency = expense_selected_currency(isset($_GET['cur']) ? $_GET['cur'] : 'USD');
 ?>
 <!DOCTYPE html>
 <html>

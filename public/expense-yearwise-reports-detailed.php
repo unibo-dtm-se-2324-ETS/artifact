@@ -2,91 +2,28 @@
 session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
 include(__DIR__ . '/../src/report-helpers.php');
+include(__DIR__ . '/../src/report-service.php');
 if (strlen($_SESSION['detsuid']==0)) {
   header('location:logout.php');
 } else {
-  $userid = $_SESSION['detsuid'];
+  $userid = (int)$_SESSION['detsuid'];
   $currency = report_selected_currency('currency');
-  $msg = '';
-  $fromYear = isset($_POST['fromyear']) ? intval($_POST['fromyear']) : (isset($_GET['fromyear']) ? intval($_GET['fromyear']) : 0);
-  $toYear = isset($_POST['toyear']) ? intval($_POST['toyear']) : (isset($_GET['toyear']) ? intval($_GET['toyear']) : 0);
-  $rows = array();
-  $labels = array();
-  $values = array();
-  $totalExpense = 0;
-  $recordCount = 0;
-  $topPeriodLabel = 'N/A';
-  $topPeriodValue = 0;
-  $fromDate = '';
-  $toDate = '';
-  $exportLink = '';
-  $categoryRows = array();
-  $categoryLabels = array();
-  $categoryValues = array();
+  $input = report_read_input('year', $_POST, $_GET);
+  $fromYear = $input['from'];
+  $toYear = $input['to'];
 
-  $currencyColumn = mysqli_query($con, "SHOW COLUMNS FROM tblexpense LIKE 'Currency'");
-  if (mysqli_num_rows($currencyColumn) == 0) {
-    mysqli_query($con, "ALTER TABLE tblexpense ADD COLUMN Currency varchar(10) NOT NULL DEFAULT 'USD' AFTER ExpenseCost");
-  }
-
-  if ($fromYear == 0 || $toYear == 0) {
-    $msg = 'Please choose both years.';
-  } elseif ($fromYear > $toYear) {
-    $msg = 'From year cannot be after To year.';
-  } else {
-    $fromDate = $fromYear . '-01-01';
-    $toDate = $toYear . '-12-31';
-    $query = mysqli_query($con, "SELECT YEAR(ExpenseDate) as reportyear, SUM(ExpenseCost) as totalamount FROM tblexpense WHERE UserId='$userid' AND Currency='$currency' AND ExpenseDate BETWEEN '$fromDate' AND '$toDate' GROUP BY YEAR(ExpenseDate) ORDER BY YEAR(ExpenseDate)");
-    while ($row = mysqli_fetch_array($query)) {
-      $rows[] = $row;
-      $labels[] = (string)$row['reportyear'];
-      $values[] = (float)$row['totalamount'];
-      $totalExpense += (float)$row['totalamount'];
-    }
-
-    $recordCount = count($rows);
-    $avgPeriodValue = $recordCount > 0 ? $totalExpense / $recordCount : 0;
-    if ($recordCount > 0) {
-      $topPeriodValue = max($values);
-      foreach ($rows as $row) {
-        if ((float)$row['totalamount'] === (float)$topPeriodValue) {
-          $topPeriodLabel = $row['reportyear'];
-          break;
-        }
-      }
-    }
-
-    $exportLink = 'expense-yearwise-reports-detailed.php?' . http_build_query(array(
-      'fromyear' => $fromYear,
-      'toyear' => $toYear,
-      'currency' => $currency,
-      'export' => 'csv'
-    ));
-
-    $catQuery = mysqli_query($con, "SELECT COALESCE(c.CategoryName, 'Uncategorized') as catname, SUM(e.ExpenseCost) as totalamount FROM tblexpense e LEFT JOIN tblcategories c ON e.CategoryId = c.ID WHERE e.UserId='$userid' AND e.Currency='$currency' AND e.ExpenseDate BETWEEN '$fromDate' AND '$toDate' GROUP BY e.CategoryId, c.CategoryName ORDER BY totalamount DESC");
-    if ($catQuery) {
-      while ($catRow = mysqli_fetch_array($catQuery)) {
-        $categoryRows[] = $catRow;
-        $categoryLabels[] = $catRow['catname'] ? $catRow['catname'] : 'Uncategorized';
-        $categoryValues[] = (float)$catRow['totalamount'];
-      }
-    }
-  }
+  expense_ensure_schema($con);
+  extract(report_build($con, $userid, $currency, 'year', $input['from'], $input['to']));
 
   if ($msg == '' && isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename=yearly-report-' . date('Ymd-His') . '.csv');
+    header('Content-Disposition: attachment; filename=' . report_csv_name('year') . '-' . date('Ymd-His') . '.csv');
     $output = fopen('php://output', 'w');
-    fputcsv($output, array('Year', 'Total', 'Currency'));
-    foreach ($rows as $row) {
-      fputcsv($output, array(
-        $row['reportyear'],
-        number_format((float)$row['totalamount'], 2, '.', ''),
-        $currency
-      ));
+    foreach (report_csv_lines('year', $rows, $currency, $totalExpense) as $line) {
+      fputcsv($output, $line);
     }
-    fputcsv($output, array('Grand Total', number_format((float)$totalExpense, 2, '.', ''), $currency));
     fclose($output);
     exit;
   }
