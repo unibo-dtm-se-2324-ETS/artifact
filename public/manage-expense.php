@@ -3,6 +3,7 @@ session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
 include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/expense-service.php');
 
 if (strlen($_SESSION['detsuid']) == 0) {
   header('location:logout.php');
@@ -35,115 +36,26 @@ if (isset($_POST['delete_expense'])) {
     $msg = 'Your session expired. Please try again.';
   } elseif ($deleteId <= 0) {
     $msg = 'Invalid expense selected.';
+  } elseif (expense_delete($con, $userid, $deleteId)) {
+    header('Location: manage-expense.php?status=deleted');
+    exit;
   } else {
-    $expenseToDelete = expense_fetch_one_assoc(
-      expense_prepare_and_execute(
-        $con,
-        "SELECT ReceiptPath FROM tblexpense WHERE ID=? AND UserId=? LIMIT 1",
-        'ii',
-        array($deleteId, $userid)
-      )
-    );
-
-    $stmt = expense_prepare_and_execute($con, "DELETE FROM tblexpense WHERE ID=? AND UserId=?", 'ii', array($deleteId, $userid));
-    if ($stmt) {
-      expense_close_statement($stmt);
-      if ($expenseToDelete && !empty($expenseToDelete['ReceiptPath'])) {
-        expense_delete_receipt_file($expenseToDelete['ReceiptPath']);
-      }
-      header('Location: manage-expense.php?status=deleted');
-      exit;
-    }
     $msg = 'Unable to delete this expense right now.';
   }
 }
 
-$filters = array(
-  'q' => isset($_GET['q']) ? trim($_GET['q']) : '',
-  'currency' => isset($_GET['currency']) && $_GET['currency'] !== '' ? expense_selected_currency($_GET['currency']) : '',
-  'categoryid' => isset($_GET['categoryid']) ? (int)$_GET['categoryid'] : 0,
-  'window' => isset($_GET['window']) ? trim($_GET['window']) : '',
-  'fromdate' => isset($_GET['fromdate']) ? trim($_GET['fromdate']) : '',
-  'todate' => isset($_GET['todate']) ? trim($_GET['todate']) : '',
-  'minamount' => isset($_GET['minamount']) ? trim($_GET['minamount']) : '',
-  'maxamount' => isset($_GET['maxamount']) ? trim($_GET['maxamount']) : ''
-);
-if (!in_array($filters['window'], array('', 'today', 'yesterday', 'last24h'), true)) {
-  $filters['window'] = '';
-}
+$filters = expense_normalize_filters($_GET);
 
 $categories = expense_get_categories($con, $userid);
 
-$sql = "SELECT e.ID, e.ExpenseItem, e.ExpenseCost, e.ExpenseDate, e.Currency, e.CategoryId, e.Notes, e.ReceiptPath, e.CreatedAt, c.CategoryName
-        FROM tblexpense e
-        LEFT JOIN tblcategories c ON c.ID=e.CategoryId AND c.UserId=e.UserId
-        WHERE e.UserId=?";
-$types = 'i';
-$params = array($userid);
-
-if ($filters['q'] !== '') {
-  $sql .= " AND (e.ExpenseItem LIKE ? OR e.Notes LIKE ?)";
-  $types .= 'ss';
-  $params[] = '%' . $filters['q'] . '%';
-  $params[] = '%' . $filters['q'] . '%';
-}
-if ($filters['currency'] !== '') {
-  $sql .= " AND e.Currency=?";
-  $types .= 's';
-  $params[] = $filters['currency'];
-}
-if ($filters['categoryid'] > 0) {
-  $sql .= " AND e.CategoryId=?";
-  $types .= 'i';
-  $params[] = $filters['categoryid'];
-}
-if ($filters['window'] === 'today') {
-  $sql .= " AND e.ExpenseDate=CURDATE()";
-} elseif ($filters['window'] === 'yesterday') {
-  $sql .= " AND e.ExpenseDate=DATE_SUB(CURDATE(), INTERVAL 1 DAY)";
-} elseif ($filters['window'] === 'last24h') {
-  $sql .= " AND e.CreatedAt BETWEEN DATE_SUB(NOW(), INTERVAL 24 HOUR) AND NOW()";
-}
-if ($filters['fromdate'] !== '' && strtotime($filters['fromdate'])) {
-  $sql .= " AND e.ExpenseDate>=?";
-  $types .= 's';
-  $params[] = $filters['fromdate'];
-}
-if ($filters['todate'] !== '' && strtotime($filters['todate'])) {
-  $sql .= " AND e.ExpenseDate<=?";
-  $types .= 's';
-  $params[] = $filters['todate'];
-}
-if ($filters['minamount'] !== '' && is_numeric($filters['minamount'])) {
-  $sql .= " AND e.ExpenseCost>=?";
-  $types .= 'd';
-  $params[] = (float)$filters['minamount'];
-}
-if ($filters['maxamount'] !== '' && is_numeric($filters['maxamount'])) {
-  $sql .= " AND e.ExpenseCost<=?";
-  $types .= 'd';
-  $params[] = (float)$filters['maxamount'];
-}
-
-$sql .= " ORDER BY e.CreatedAt DESC, e.ID DESC";
-$rows = expense_fetch_all_assoc(expense_prepare_and_execute($con, $sql, $types, $params));
+$rows = expense_search($con, $userid, $filters);
 
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   header('Content-Type: text/csv; charset=utf-8');
   header('Content-Disposition: attachment; filename=expenses-' . date('Ymd-His') . '.csv');
   $output = fopen('php://output', 'w');
-  fputcsv($output, array('Date', 'Recorded At', 'Item', 'Category', 'Amount', 'Currency', 'Notes', 'Receipt'));
-  foreach ($rows as $row) {
-    fputcsv($output, array(
-      $row['ExpenseDate'],
-      $row['CreatedAt'],
-      $row['ExpenseItem'],
-      $row['CategoryName'] ? $row['CategoryName'] : 'Uncategorized',
-      number_format((float)$row['ExpenseCost'], 2, '.', ''),
-      $row['Currency'],
-      preg_replace('/\s+/', ' ', trim((string)$row['Notes'])),
-      $row['ReceiptPath']
-    ));
+  foreach (expense_csv_lines($rows) as $line) {
+    fputcsv($output, $line);
   }
   fclose($output);
   exit;

@@ -3,6 +3,7 @@ session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
 include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/expense-service.php');
 
 if (strlen($_SESSION['detsuid']) == 0) {
   header('location:logout.php');
@@ -18,14 +19,7 @@ expense_ensure_user_categories($con, $userid);
 expense_process_recurring($con, $userid);
 $csrfToken = expense_csrf_token();
 
-$expense = expense_fetch_one_assoc(
-  expense_prepare_and_execute(
-    $con,
-    "SELECT ID, ExpenseDate, ExpenseItem, ExpenseCost, Currency, CategoryId, Notes, ReceiptPath FROM tblexpense WHERE ID=? AND UserId=? LIMIT 1",
-    'ii',
-    array($editid, $userid)
-  )
-);
+$expense = expense_find($con, $userid, $editid);
 
 if (!$expense) {
   $msg = 'Invalid expense record.';
@@ -52,15 +46,11 @@ if ($expense && isset($_POST['submit'])) {
 
   if (!expense_verify_csrf(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '')) {
     $msg = 'Your session expired. Please try again.';
-  } elseif ($form['dateexpense'] == '' || !strtotime($form['dateexpense'])) {
-    $msg = 'Please choose a valid expense date.';
-  } elseif ($form['item'] == '') {
-    $msg = 'Please select an item.';
-  } elseif ($form['costitem'] == '' || !is_numeric($form['costitem']) || (float)$form['costitem'] <= 0) {
-    $msg = 'Please enter a valid cost greater than zero.';
-  } elseif ($categoryId <= 0) {
-    $msg = 'Please choose a category.';
   } else {
+    $msg = expense_validate_form($form, $categoryId);
+  }
+
+  if ($msg === '') {
     $category = expense_find_category_by_id($con, $userid, $categoryId);
     if (!$category) {
       $msg = 'The selected category is invalid.';
@@ -82,16 +72,7 @@ if ($expense && isset($_POST['submit'])) {
       }
 
       if ($msg == '') {
-        $cost = (float)$form['costitem'];
-        $stmt = expense_prepare_and_execute(
-          $con,
-          "UPDATE tblexpense SET ExpenseDate=?, ExpenseItem=?, ExpenseCost=?, Currency=?, CategoryId=?, Notes=?, ReceiptPath=? WHERE ID=? AND UserId=?",
-          'ssdsissii',
-          array($form['dateexpense'], $form['item'], $cost, $form['currency'], $categoryId, $form['notes'], $receiptPath, $editid, $userid)
-        );
-
-        if ($stmt) {
-          expense_close_statement($stmt);
+        if (expense_update($con, $userid, $editid, $form, $categoryId, $receiptPath)) {
           header('Location: manage-expense.php?status=updated');
           exit;
         }
