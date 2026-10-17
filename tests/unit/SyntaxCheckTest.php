@@ -27,7 +27,8 @@ final class SyntaxCheckTest extends TestCase
             glob($root . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . '*.php') ?: array(),
             glob($root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '*.php') ?: array(),
             glob($root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . '*.php') ?: array(),
-            glob($root . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . '*.php') ?: array()
+            glob($root . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . '*.php') ?: array(),
+            glob($root . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . '*.php') ?: array()
         );
 
         sort($files);

@@ -3,6 +3,7 @@ session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
 include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/expense-service.php');
 
 if (strlen($_SESSION['detsuid']) == 0) {
   header('location:logout.php');
@@ -39,15 +40,11 @@ if (isset($_POST['submit'])) {
 
   if (!expense_verify_csrf(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '')) {
     $msg = 'Your session expired. Please try again.';
-  } elseif ($form['dateexpense'] == '' || !strtotime($form['dateexpense'])) {
-    $msg = 'Please choose a valid expense date.';
-  } elseif ($form['item'] == '') {
-    $msg = 'Please select an item.';
-  } elseif ($form['costitem'] == '' || !is_numeric($form['costitem']) || (float)$form['costitem'] <= 0) {
-    $msg = 'Please enter a valid cost greater than zero.';
-  } elseif ($categoryId <= 0) {
-    $msg = 'Please choose a category.';
   } else {
+    $msg = expense_validate_form($form, $categoryId);
+  }
+
+  if ($msg === '') {
     $category = expense_find_category_by_id($con, $userid, $categoryId);
     if (!$category) {
       $msg = 'The selected category is invalid.';
@@ -55,22 +52,10 @@ if (isset($_POST['submit'])) {
       $upload = expense_handle_receipt_upload(isset($_FILES['receipt']) ? $_FILES['receipt'] : array(), $userid);
       if ($upload['error'] !== '') {
         $msg = $upload['error'];
+      } elseif (expense_create($con, $userid, $form, $categoryId, $upload['path'])) {
+        header('Location: manage-expense.php?status=added');
+        exit;
       } else {
-        $cost = (float)$form['costitem'];
-        $receiptPath = $upload['path'];
-        $stmt = expense_prepare_and_execute(
-          $con,
-          "INSERT INTO tblexpense (UserId, ExpenseDate, ExpenseItem, ExpenseCost, Currency, CategoryId, Notes, ReceiptPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-          'issdsiss',
-          array($userid, $form['dateexpense'], $form['item'], $cost, $form['currency'], $categoryId, $form['notes'], $receiptPath)
-        );
-
-        if ($stmt) {
-          expense_close_statement($stmt);
-          header('Location: manage-expense.php?status=added');
-          exit;
-        }
-
         $msg = 'Something went wrong. Please try again.';
       }
     }

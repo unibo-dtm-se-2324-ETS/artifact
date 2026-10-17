@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../../src/expense-helpers.php';
-
 final class ExpenseHelpersTest extends TestCase
 {
     protected function setUp(): void
     {
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/expense-helpers.php';
         $_SESSION = array();
     }
 
@@ -207,6 +207,40 @@ final class ExpenseHelpersTest extends TestCase
             // the extension itself must not be the reason.
             $this->assertSame('Could not save the uploaded receipt.', $result['error'], $name);
             $this->assertSame('', $result['path']);
+        }
+    }
+
+    public function testReceiptUploadSavesTheFileCreatesTheFolderAndReturnsTheRelativePath(): void
+    {
+        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'receipts-test-' . bin2hex(random_bytes(4)) . DIRECTORY_SEPARATOR . 'nested';
+        $source = tempnam(sys_get_temp_dir(), 'rcpt');
+        file_put_contents($source, 'receipt content');
+
+        $this->assertDirectoryDoesNotExist($dir);
+
+        try {
+            $result = expense_handle_receipt_upload(
+                array('error' => UPLOAD_ERR_OK, 'name' => 'Scan.PDF', 'tmp_name' => $source),
+                7,
+                $dir,
+                'copy'
+            );
+
+            $this->assertSame('', $result['error']);
+            $this->assertMatchesRegularExpression('#^uploads/receipts/receipt_7_\d+_[a-f0-9]{8}\.pdf$#', $result['path']);
+            $this->assertDirectoryExists($dir);
+            $this->assertSame('receipt content', file_get_contents($dir . DIRECTORY_SEPARATOR . basename($result['path'])));
+
+            $second = expense_handle_receipt_upload(array('error' => UPLOAD_ERR_OK, 'name' => 'b.png', 'tmp_name' => $source), 7, $dir, 'copy');
+            $this->assertSame('', $second['error']);
+            $this->assertNotSame($result['path'], $second['path']);
+        } finally {
+            foreach (glob($dir . DIRECTORY_SEPARATOR . '*') ?: array() as $file) {
+                unlink($file);
+            }
+            @rmdir($dir);
+            @rmdir(dirname($dir));
+            @unlink($source);
         }
     }
 }

@@ -2,21 +2,19 @@
 session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
-error_reporting(0);
+include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/account-service.php');
 
 if(isset($_POST['submit']))
   {
-    $contactno=$_SESSION['contactno'];
-    $email=$_SESSION['email'];
-    $password=md5($_POST['newpassword']);
+    $contactno = isset($_SESSION['contactno']) ? $_SESSION['contactno'] : '';
+    $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
 
-        $query=mysqli_query($con,"update tbluser set Password='$password'  where  Email='$email' && MobileNumber='$contactno' ");
-   if($query)
-   {
-echo "<script>alert('Password successfully changed');</script>";
-session_destroy();
-   }
-  
+    if(auth_reset_password($con, $email, $contactno, isset($_POST['newpassword']) ? $_POST['newpassword'] : ''))
+    {
+      echo "<script>alert('Password successfully changed');</script>";
+      session_destroy();
+    }
   }
   ?>
 <!DOCTYPE html>

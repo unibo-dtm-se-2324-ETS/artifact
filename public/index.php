@@ -1,16 +1,16 @@
 <?php session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/account-service.php');
 
 if(isset($_POST['login']))
   {
-    $email=$_POST['email'];
-    $password=md5($_POST['password']);
-    $query=mysqli_query($con,"select ID from tbluser where  Email='$email' && Password='$password' ");
-    $ret=mysqli_fetch_array($query);
-    if($ret>0){
-      $_SESSION['detsuid']=$ret['ID'];
-     header('location:dashboard.php');
+    $userId = auth_login($con, isset($_POST['email']) ? $_POST['email'] : '', isset($_POST['password']) ? $_POST['password'] : '');
+    if($userId > 0){
+      session_regenerate_id(true);
+      $_SESSION['detsuid']=$userId;
+      header('location:dashboard.php');
     }
     else{
     $msg="Invalid Details.";

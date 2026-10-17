@@ -1,33 +1,22 @@
-<?php 
+<?php
 session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/account-service.php');
 if(isset($_POST['submit']))
   {
-    $fname=$_POST['name'];
-    $mobno=$_POST['mobilenumber'];
-    $email=$_POST['email'];
-    $password=md5($_POST['password']);
-
-    $ret=mysqli_query($con, "select Email from tbluser where Email='$email' ");
-    $result=mysqli_fetch_array($ret);
-    if($result>0){
-$msg="This email  associated with another account";
-    }
-    else{
-    $query=mysqli_query($con, "insert into tbluser(FullName, MobileNumber, Email,  Password) value('$fname', '$mobno', '$email', '$password' )");
-    if ($query) {
-    $msg="You have successfully registered";
+    $result = auth_register(
+      $con,
+      isset($_POST['name']) ? $_POST['name'] : '',
+      isset($_POST['mobilenumber']) ? $_POST['mobilenumber'] : '',
+      isset($_POST['email']) ? $_POST['email'] : '',
+      isset($_POST['password']) ? $_POST['password'] : ''
+    );
+    $msg = $result['message'];
   }
-  else
-    {
-      $msg="Something Went Wrong. Please try again";
-    }
-}
-}
 
  ?>
-
 <!DOCTYPE html>
 <html>
 <head>

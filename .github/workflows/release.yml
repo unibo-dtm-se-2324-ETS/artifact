@@ -24,7 +24,7 @@ jobs:
           php-version: "8.2"
 
       - name: Build package
-        run: php build.php
+        run: php scripts/build.php
 
       - name: Name the package after the version
         run: mv build/expense-tracker.zip "build/expense-tracker-${GITHUB_REF_NAME}.zip"

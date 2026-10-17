@@ -311,7 +311,8 @@ if (!function_exists('expense_get_user_settings')) {
 }
 
 if (!function_exists('expense_handle_receipt_upload')) {
-  function expense_handle_receipt_upload($file, $userid) {
+  // $uploadDir and $mover only exist so that the function can be tested; the application uses the defaults.
+  function expense_handle_receipt_upload($file, $userid, $uploadDir = null, $mover = 'move_uploaded_file') {
     if (!isset($file['error']) || $file['error'] === UPLOAD_ERR_NO_FILE) {
       return array('path' => '', 'error' => '');
     }
@@ -327,7 +328,9 @@ if (!function_exists('expense_handle_receipt_upload')) {
       return array('path' => '', 'error' => 'Receipt must be a JPG, PNG, or PDF file.');
     }
 
-    $uploadDir = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts';
+    if ($uploadDir === null) {
+      $uploadDir = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'receipts';
+    }
     if (!is_dir($uploadDir)) {
       mkdir($uploadDir, 0777, true);
     }
@@ -335,7 +338,7 @@ if (!function_exists('expense_handle_receipt_upload')) {
     $filename = 'receipt_' . $userid . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
     $targetPath = $uploadDir . DIRECTORY_SEPARATOR . $filename;
 
-    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+    if (!call_user_func($mover, $file['tmp_name'], $targetPath)) {
       return array('path' => '', 'error' => 'Could not save the uploaded receipt.');
     }
 

@@ -15,17 +15,24 @@ Expense Tracker System is a PHP and MySQL web application for recording personal
 
 ```text
 Expense-Tracker-System/
-├── public/        Web root: the application pages, assets/ (css, js, fonts, images, plugins) and uploads/
-├── src/           Business logic: expense and report helper functions
-├── config/        Database connection settings
-├── templates/     Shared layout pieces (header, sidebar, footer)
-├── database/      Schema (database.sql) and demo seed data
-├── tests/         Unit tests and the browser end-to-end test
-├── docs/          Acceptance checklist and presentation material
-├── .github/       CI workflows (syntax check, tests + coverage, build)
-├── build.php      Builds the release package (composer build)
-├── index.php      Redirects the old address to public/
-└── composer.json  Dependencies and scripts (lint, test, test:coverage, build)
+├── public/          Web root: application pages, assets/ (css, js, fonts, images), uploads/
+├── src/             Business logic: expense and report helper functions
+├── config/          Database connection settings
+├── templates/       Shared layout pieces (header, sidebar, footer)
+├── database/        Schema (database.sql) and demo seed data
+├── resources/       Source files that are not served (Sass)
+├── scripts/         Developer tooling: build.php, coverage-summary.php
+├── tests/
+│   ├── unit/        Unit tests and PHP syntax checks
+│   ├── integration/ Database tests (separate detsdb_test database)
+│   └── e2e/         Playwright browser test
+├── docs/            Acceptance checklist and presentations
+├── .github/         CI workflows (CI, PHP syntax check, release)
+├── index.php        Redirects the old address to public/
+├── composer.json    Dependencies and scripts (lint, test, test:coverage, build)
+├── VERSION          Current version (Semantic Versioning)
+├── CHANGELOG.md     History of changes
+└── CONTRIBUTING.md  Commit format, branch workflow, how to run the tests
 ```
 
 Uploaded receipts are stored in `public/uploads/receipts/`.
@@ -76,13 +83,22 @@ The release package can be built locally with `composer build`, which writes `bu
 
 ### PHP test coverage
 
-Measured with PHPUnit and PCOV (78 tests, all passing), 2 October 2026:
+Measured with PHPUnit and PCOV (263 tests, all passing), 17 October 2026:
 
 | File | Statements | Methods | Covered statements |
 |---|---|---|---|
-| `src/expense-helpers.php` | 87.1% | 100.0% | 182/209 |
-| `src/report-helpers.php` | 80.8% | 100.0% | 21/26 |
-| **Total** | **86.4%** | **100.0%** | **203/235** |
+| `src/account-service.php` | 100.0% | 100.0% | 101/101 |
+| `src/category-service.php` | 100.0% | 100.0% | 100/100 |
+| `src/dashboard-service.php` | 100.0% | 100.0% | 166/166 |
+| `src/expense-helpers.php` | 100.0% | 100.0% | 210/210 |
+| `src/expense-service.php` | 100.0% | 100.0% | 126/126 |
+| `src/item-service.php` | 100.0% | 100.0% | 43/43 |
+| `src/recurring-service.php` | 100.0% | 100.0% | 84/84 |
+| `src/report-helpers.php` | 100.0% | 100.0% | 26/26 |
+| `src/report-service.php` | 100.0% | 100.0% | 143/143 |
+| **Total** | **100.0%** | **100.0%** | **999/999** |
+
+All the application logic and every database query live in `src/`; the files in `public/` only call it and show the result, and the browser test walks through them. The CI pipeline fails if the coverage of `src/` drops below 95%.
 
 The table is regenerated on every push by the CI workflow and appears on the run's Summary page on GitHub; the full HTML report is attached to the run as the `coverage-report` artifact. The page files are not part of the unit-test coverage and are checked by the browser test below.
 

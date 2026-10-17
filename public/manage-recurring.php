@@ -3,6 +3,8 @@ session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
 include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/item-service.php');
+include(__DIR__ . '/../src/recurring-service.php');
 
 if (strlen($_SESSION['detsuid']) == 0) {
   header('location:logout.php');
@@ -19,22 +21,14 @@ expense_ensure_user_categories($con, $userid);
 expense_process_recurring($con, $userid);
 $csrfToken = expense_csrf_token();
 $categories = expense_get_categories($con, $userid);
-$items = expense_fetch_all_assoc(expense_prepare_and_execute($con, "SELECT ItemName FROM tblitems WHERE UserId=? ORDER BY ItemName ASC", 'i', array($userid)));
+$items = item_list($con, $userid);
 
 $editRecurring = null;
 if (isset($_GET['editid'])) {
-  $editRecurring = expense_fetch_one_assoc(expense_prepare_and_execute($con, "SELECT * FROM tblrecurring WHERE ID=? AND UserId=? LIMIT 1", 'ii', array((int)$_GET['editid'], $userid)));
+  $editRecurring = recurring_find($con, $userid, (int)$_GET['editid']);
 }
 
-$form = array(
-  'item' => $editRecurring ? $editRecurring['ExpenseItem'] : '',
-  'cost' => $editRecurring ? $editRecurring['ExpenseCost'] : '',
-  'currency' => $editRecurring ? expense_selected_currency($editRecurring['Currency']) : 'USD',
-  'categoryid' => $editRecurring ? (string)$editRecurring['CategoryId'] : '',
-  'frequency' => $editRecurring ? $editRecurring['Frequency'] : 'monthly',
-  'startdate' => $editRecurring ? $editRecurring['StartDate'] : date('Y-m-d'),
-  'notes' => $editRecurring ? $editRecurring['Notes'] : ''
-);
+$form = recurring_form_defaults($editRecurring);
 
 if (isset($_POST['save_recurring']) || isset($_POST['delete_recurring']) || isset($_POST['toggle_recurring'])) {
   if (!expense_verify_csrf(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '')) {
@@ -42,96 +36,34 @@ if (isset($_POST['save_recurring']) || isset($_POST['delete_recurring']) || isse
   }
 }
 
-if ($msg == '' && isset($_POST['save_recurring'])) {
-  $recurringId = isset($_POST['recurring_id']) ? (int)$_POST['recurring_id'] : 0;
-  $form['item'] = isset($_POST['item']) ? trim($_POST['item']) : '';
-  $form['cost'] = isset($_POST['cost']) ? trim($_POST['cost']) : '';
-  $form['currency'] = expense_selected_currency(isset($_POST['currency']) ? $_POST['currency'] : 'USD');
-  $form['categoryid'] = isset($_POST['categoryid']) ? trim($_POST['categoryid']) : '';
-  $form['frequency'] = isset($_POST['frequency']) && $_POST['frequency'] === 'weekly' ? 'weekly' : 'monthly';
-  $form['startdate'] = isset($_POST['startdate']) ? trim($_POST['startdate']) : date('Y-m-d');
-  $form['notes'] = isset($_POST['notes']) ? trim($_POST['notes']) : '';
-  $categoryId = (int)$form['categoryid'];
+$result = null;
 
-  if ($form['item'] == '' || $form['cost'] == '' || !is_numeric($form['cost']) || (float)$form['cost'] <= 0) {
-    $msg = 'Please fill in a valid item and amount.';
-  } elseif ($categoryId <= 0) {
-    $msg = 'Please choose a category.';
-  } elseif ($form['startdate'] == '' || !strtotime($form['startdate'])) {
-    $msg = 'Please choose a valid start date.';
-  } else {
-    if ($recurringId > 0) {
-      $stmt = expense_prepare_and_execute(
-        $con,
-        "UPDATE tblrecurring
-         SET ExpenseItem=?, ExpenseCost=?, Currency=?, CategoryId=?, Notes=?, Frequency=?, StartDate=?, NextRunDate=?
-         WHERE ID=? AND UserId=?",
-        'sdsissssii',
-        array($form['item'], (float)$form['cost'], $form['currency'], $categoryId, $form['notes'], $form['frequency'], $form['startdate'], $form['startdate'], $recurringId, $userid)
-      );
-      $success = $stmt ? 'Recurring expense updated.' : '';
-      if (!$stmt) {
-        $msg = 'Unable to update recurring expense.';
-      } else {
-        expense_close_statement($stmt);
-      }
-    } else {
-      $stmt = expense_prepare_and_execute(
-        $con,
-        "INSERT INTO tblrecurring (UserId, ExpenseItem, ExpenseCost, Currency, CategoryId, Notes, Frequency, StartDate, NextRunDate, IsActive)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)",
-        'isdsissss',
-        array($userid, $form['item'], (float)$form['cost'], $form['currency'], $categoryId, $form['notes'], $form['frequency'], $form['startdate'], $form['startdate'])
-      );
-      $success = $stmt ? 'Recurring expense created.' : '';
-      if (!$stmt) {
-        $msg = 'Unable to create recurring expense.';
-      } else {
-        expense_close_statement($stmt);
-      }
-    }
-    if ($success !== '') {
-      $editRecurring = null;
-      $form = array('item' => '', 'cost' => '', 'currency' => 'USD', 'categoryid' => '', 'frequency' => 'monthly', 'startdate' => date('Y-m-d'), 'notes' => '');
-    }
+if ($msg == '' && isset($_POST['save_recurring'])) {
+  $form = recurring_form_from_input($_POST);
+  $result = recurring_save($con, $userid, isset($_POST['recurring_id']) ? (int)$_POST['recurring_id'] : 0, $form);
+  if ($result['ok']) {
+    $editRecurring = null;
+    $form = recurring_form_defaults(null);
   }
 }
 
 if ($msg == '' && isset($_POST['delete_recurring'])) {
-  $recurringId = (int)$_POST['recurring_id'];
-  $stmt = expense_prepare_and_execute($con, "DELETE FROM tblrecurring WHERE ID=? AND UserId=?", 'ii', array($recurringId, $userid));
-  if ($stmt) {
-    expense_close_statement($stmt);
-    $success = 'Recurring expense deleted.';
-  } else {
-    $msg = 'Unable to delete recurring expense.';
-  }
+  $result = recurring_delete($con, $userid, (int)$_POST['recurring_id']);
 }
 
 if ($msg == '' && isset($_POST['toggle_recurring'])) {
-  $recurringId = (int)$_POST['recurring_id'];
-  $isActive = (int)$_POST['is_active'] === 1 ? 0 : 1;
-  $stmt = expense_prepare_and_execute($con, "UPDATE tblrecurring SET IsActive=? WHERE ID=? AND UserId=?", 'iii', array($isActive, $recurringId, $userid));
-  if ($stmt) {
-    expense_close_statement($stmt);
-    $success = $isActive ? 'Recurring expense activated.' : 'Recurring expense paused.';
+  $result = recurring_toggle($con, $userid, (int)$_POST['recurring_id'], (int)$_POST['is_active']);
+}
+
+if ($result !== null) {
+  if ($result['ok']) {
+    $success = $result['message'];
   } else {
-    $msg = 'Unable to update recurring expense.';
+    $msg = $result['message'];
   }
 }
 
-$recurringRows = expense_fetch_all_assoc(
-  expense_prepare_and_execute(
-    $con,
-    "SELECT r.*, c.CategoryName
-     FROM tblrecurring r
-     LEFT JOIN tblcategories c ON c.ID=r.CategoryId AND c.UserId=r.UserId
-     WHERE r.UserId=?
-     ORDER BY r.IsActive DESC, r.NextRunDate ASC, r.ID DESC",
-    'i',
-    array($userid)
-  )
-);
+$recurringRows = recurring_list($con, $userid);
 ?>
 <!DOCTYPE html>
 <html>

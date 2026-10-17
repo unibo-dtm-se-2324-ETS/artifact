@@ -2,87 +2,28 @@
 session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
 include(__DIR__ . '/../src/report-helpers.php');
+include(__DIR__ . '/../src/report-service.php');
 if (strlen($_SESSION['detsuid']==0)) {
   header('location:logout.php');
 } else {
-  $userid = $_SESSION['detsuid'];
+  $userid = (int)$_SESSION['detsuid'];
   $currency = report_selected_currency('currency');
-  $msg = '';
-  $fromDate = isset($_POST['fromdate']) ? $_POST['fromdate'] : (isset($_GET['fromdate']) ? $_GET['fromdate'] : '');
-  $toDate = isset($_POST['todate']) ? $_POST['todate'] : (isset($_GET['todate']) ? $_GET['todate'] : '');
-  $rows = array();
-  $labels = array();
-  $values = array();
-  $totalExpense = 0;
-  $recordCount = 0;
-  $topPeriodLabel = 'N/A';
-  $topPeriodValue = 0;
-  $exportLink = '';
-  $categoryRows = array();
-  $categoryLabels = array();
-  $categoryValues = array();
+  $input = report_read_input('day', $_POST, $_GET);
+  $fromDate = $input['from'];
+  $toDate = $input['to'];
 
-  $currencyColumn = mysqli_query($con, "SHOW COLUMNS FROM tblexpense LIKE 'Currency'");
-  if (mysqli_num_rows($currencyColumn) == 0) {
-    mysqli_query($con, "ALTER TABLE tblexpense ADD COLUMN Currency varchar(10) NOT NULL DEFAULT 'USD' AFTER ExpenseCost");
-  }
-
-  if ($fromDate == '' || $toDate == '') {
-    $msg = 'Please choose both dates.';
-  } elseif ($fromDate > $toDate) {
-    $msg = 'From date cannot be after To date.';
-  } else {
-    $query = mysqli_query($con, "SELECT ExpenseDate, SUM(ExpenseCost) as totalamount FROM tblexpense WHERE UserId='$userid' AND Currency='$currency' AND ExpenseDate BETWEEN '$fromDate' AND '$toDate' GROUP BY ExpenseDate ORDER BY ExpenseDate ASC");
-    while ($row = mysqli_fetch_array($query)) {
-      $rows[] = $row;
-      $labels[] = date('M j', strtotime($row['ExpenseDate']));
-      $values[] = (float)$row['totalamount'];
-      $totalExpense += (float)$row['totalamount'];
-    }
-
-    $recordCount = count($rows);
-    $avgPeriodValue = $recordCount > 0 ? $totalExpense / $recordCount : 0;
-    if ($recordCount > 0) {
-      $topPeriodValue = max($values);
-      foreach ($rows as $row) {
-        if ((float)$row['totalamount'] === (float)$topPeriodValue) {
-          $topPeriodLabel = date('F j, Y', strtotime($row['ExpenseDate']));
-          break;
-        }
-      }
-    }
-
-    $exportLink = 'expense-datewise-reports-detailed.php?' . http_build_query(array(
-      'fromdate' => $fromDate,
-      'todate' => $toDate,
-      'currency' => $currency,
-      'export' => 'csv'
-    ));
-
-    $catQuery = mysqli_query($con, "SELECT COALESCE(c.CategoryName, 'Uncategorized') as catname, SUM(e.ExpenseCost) as totalamount FROM tblexpense e LEFT JOIN tblcategories c ON e.CategoryId = c.ID WHERE e.UserId='$userid' AND e.Currency='$currency' AND e.ExpenseDate BETWEEN '$fromDate' AND '$toDate' GROUP BY e.CategoryId, c.CategoryName ORDER BY totalamount DESC");
-    if ($catQuery) {
-      while ($catRow = mysqli_fetch_array($catQuery)) {
-        $categoryRows[] = $catRow;
-        $categoryLabels[] = $catRow['catname'] ? $catRow['catname'] : 'Uncategorized';
-        $categoryValues[] = (float)$catRow['totalamount'];
-      }
-    }
-  }
+  expense_ensure_schema($con);
+  extract(report_build($con, $userid, $currency, 'day', $input['from'], $input['to']));
 
   if ($msg == '' && isset($_GET['export']) && $_GET['export'] === 'csv') {
     header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename=daily-report-' . date('Ymd-His') . '.csv');
+    header('Content-Disposition: attachment; filename=' . report_csv_name('day') . '-' . date('Ymd-His') . '.csv');
     $output = fopen('php://output', 'w');
-    fputcsv($output, array('Date', 'Total', 'Currency'));
-    foreach ($rows as $row) {
-      fputcsv($output, array(
-        $row['ExpenseDate'],
-        number_format((float)$row['totalamount'], 2, '.', ''),
-        $currency
-      ));
+    foreach (report_csv_lines('day', $rows, $currency, $totalExpense) as $line) {
+      fputcsv($output, $line);
     }
-    fputcsv($output, array('Grand Total', number_format((float)$totalExpense, 2, '.', ''), $currency));
     fclose($output);
     exit;
   }

@@ -49,11 +49,13 @@ Install the dependencies once: `composer install`.
 | `composer lint` | checks every PHP file for syntax errors |
 | `composer test` | runs the PHPUnit tests |
 | `composer test:coverage` | runs the tests and writes a coverage report to `build/coverage/` (needs PCOV or Xdebug) |
-| `composer build` | creates `build/expense-tracker.zip` |
+| `composer build` | runs `scripts/build.php` and creates `build/expense-tracker.zip` |
 | `python tests/e2e/playwright_smoke.py` | browser test; needs Apache and MySQL running and the setup in the README |
 
 The database tests use their own `detsdb_test` database and are skipped when MySQL is not
 reachable. They never touch your real data.
+
+Tests live in `tests/unit` (functions and syntax), `tests/integration` (database) and `tests/e2e` (browser).
 
 Add or update tests for every change, and run `composer test` before opening a pull request.
 

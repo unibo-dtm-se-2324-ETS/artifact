@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import time
+from datetime import date
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -144,6 +145,42 @@ def check_manage_expense_filters(page: Page, item_name: str) -> None:
     expect(page.get_by_text("1 records").or_(page.get_by_text("records"))).to_be_visible()
 
 
+def check_csv_export(page: Page, item_name: str) -> None:
+    goto_app(page, "manage-expense.php")
+    with page.expect_download() as download_info:
+        page.get_by_role("link", name="Export CSV").click()
+
+    content = Path(download_info.value.path()).read_text(encoding="utf-8")
+    lines = [line for line in content.splitlines() if line.strip()]
+    assert lines[0] == "Date,\"Recorded At\",Item,Category,Amount,Currency,Notes,Receipt", lines[0]
+    assert any(item_name in line and "42.50" in line for line in lines[1:]), content
+
+
+def edit_expense(page: Page, item_name: str) -> None:
+    goto_app(page, "manage-expense.php")
+    page.get_by_role("link", name="Edit").first.click()
+    page.wait_for_url(re.compile("edit-expense\\.php\\?editid="), timeout=10_000)
+    expect(page.get_by_role("button", name="Update Expense")).to_be_visible()
+
+    page.locator("#costitem").fill("55.25")
+    page.locator("#notes").fill("Edited by Playwright full-site test")
+    page.get_by_role("button", name="Update Expense").click()
+    page.wait_for_url(re.compile("manage-expense\\.php\\?status=updated"), timeout=10_000)
+    expect(page.get_by_text("Expense updated successfully.")).to_be_visible()
+    expect(page.locator("td").filter(has_text="55.25").first).to_be_visible()
+
+
+def delete_expense(page: Page, item_name: str) -> None:
+    goto_app(page, "manage-expense.php")
+    expect(page.locator("td").filter(has_text=item_name).first).to_be_visible()
+
+    page.once("dialog", lambda dialog: dialog.accept())
+    page.get_by_role("button", name="Delete").first.click()
+    page.wait_for_url(re.compile("manage-expense\\.php\\?status=deleted"), timeout=10_000)
+    expect(page.get_by_text("Expense deleted successfully.")).to_be_visible()
+    expect(page.locator("td").filter(has_text=item_name)).to_have_count(0)
+
+
 def add_recurring_expense(page: Page, item_name: str, category_name: str) -> None:
     goto_app(page, "manage-recurring.php")
     expect(page.locator(".metric-label").filter(has_text="Add recurring expense")).to_be_visible()
@@ -155,6 +192,41 @@ def add_recurring_expense(page: Page, item_name: str, category_name: str) -> Non
     page.get_by_role("button", name="Add Recurring").click()
     expect(page.get_by_text("Recurring expense created.")).to_be_visible()
     expect(page.locator("td").filter(has_text=item_name).first).to_be_visible()
+
+
+def check_dashboard_and_reports(page: Page) -> None:
+    today = date.today()
+
+    goto_app(page, "dashboard.php")
+    expect(page.get_by_text("Last 7 Days").first).to_be_visible()
+    expect(page.get_by_text("Active Days").first).to_be_visible()
+
+    reports = [
+        (f"expense-datewise-reports-detailed.php?fromdate=2000-01-01&todate={today.isoformat()}&currency=USD", "Avg / Day"),
+        (f"expense-monthwise-reports-detailed.php?frommonth=2000-01&tomonth={today.strftime('%Y-%m')}&currency=USD", "Avg / Month"),
+        (f"expense-yearwise-reports-detailed.php?fromyear=2000&toyear={today.year}&currency=USD", "Avg / Year"),
+    ]
+    for path, label in reports:
+        goto_app(page, path)
+        expect(page.get_by_text("Range:").first).to_be_visible()
+        expect(page.get_by_text(label).first).to_be_visible()
+
+    # the last report shown is the yearly one: its CSV export has a header and a grand total
+    with page.expect_download() as download_info:
+        page.get_by_role("link", name="Export CSV").click()
+    content = Path(download_info.value.path()).read_text(encoding="utf-8")
+    lines = [line for line in content.splitlines() if line.strip()]
+    assert lines[0] == "Year,Total,Currency", lines[0]
+    assert lines[-1].startswith('"Grand Total",'), lines[-1]
+
+    goto_app(page, "expense-datewise-reports-detailed.php?fromdate=2026-12-31&todate=2026-01-01&currency=USD")
+    expect(page.get_by_text("From date cannot be after To date.")).to_be_visible()
+
+    goto_app(page, "expense-reports.php")
+    page.locator("#fromdate").fill("2000-01-01")
+    page.locator("#todate").fill(today.isoformat())
+    page.get_by_role("button", name="Submit").click()
+    expect(page.get_by_text("Expense Report from")).to_be_visible()
 
 
 def check_authenticated_navigation(page: Page) -> None:
@@ -201,7 +273,11 @@ def run_full_app_test(browser) -> None:
         add_category_and_budget(page, category_name)
         add_expense(page, item_name, category_name)
         check_manage_expense_filters(page, item_name)
+        check_csv_export(page, item_name)
+        edit_expense(page, item_name)
+        delete_expense(page, item_name)
         add_recurring_expense(page, item_name, category_name)
+        check_dashboard_and_reports(page)
         check_authenticated_navigation(page)
     except Exception:
         save_failure_artifacts(page, "full-site-e2e-failure")

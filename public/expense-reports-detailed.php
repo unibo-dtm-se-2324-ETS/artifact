@@ -2,6 +2,9 @@
 session_start();
 error_reporting(0);
 include(__DIR__ . '/../config/database.php');
+include(__DIR__ . '/../src/expense-helpers.php');
+include(__DIR__ . '/../src/report-helpers.php');
+include(__DIR__ . '/../src/report-service.php');
 if (strlen($_SESSION['detsuid']==0)) {
   header('location:logout.php');
   } else{
@@ -53,11 +56,10 @@ if (strlen($_SESSION['detsuid']==0)) {
 						<div class="col-md-12">
 					
 <?php
-$fdate=$_POST['fromdate'];
- $tdate=$_POST['todate'];
-$rtype=$_POST['requesttype'];
+$fdate=isset($_POST['fromdate']) ? $_POST['fromdate'] : '';
+ $tdate=isset($_POST['todate']) ? $_POST['todate'] : '';
 ?>
-<h5 align="center" style="color:blue">Expense Report from <?php echo $fdate?> to <?php echo $tdate?></h5>
+<h5 align="center" style="color:blue">Expense Report from <?php echo report_h($fdate)?> to <?php echo report_h($tdate)?></h5>
 <hr />
                                     <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                         <thead>
@@ -70,10 +72,9 @@ $rtype=$_POST['requesttype'];
                                         </tr>
                                         </thead>
  <?php
-$userid=$_SESSION['detsuid'];
-$ret=mysqli_query($con,"SELECT ExpenseDate,SUM(ExpenseCost) as totaldaily FROM tblexpense  where (ExpenseDate BETWEEN '$fdate' and '$tdate') && (UserId='$userid') group by ExpenseDate");
+$userid=(int)$_SESSION['detsuid'];
 $cnt=1;
-while ($row=mysqli_fetch_array($ret)) {
+foreach (report_legacy_daily_totals($con, $userid, $fdate, $tdate) as $row) {
 
 ?>
               

@@ -68,8 +68,8 @@ jobs:
         if: always()
         run: php scripts/coverage-summary.php build/coverage/clover.xml >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Require at least 80% coverage
-        run: php scripts/coverage-summary.php build/coverage/clover.xml --min=80 > /dev/null
+      - name: Require at least 95% coverage
+        run: php scripts/coverage-summary.php build/coverage/clover.xml --min=95 > /dev/null
 
       - name: Upload coverage report
         if: always()
@@ -154,7 +154,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build package
-        run: php build.php
+        run: php scripts/build.php
 
       - name: Upload package
         uses: actions/upload-artifact@v4

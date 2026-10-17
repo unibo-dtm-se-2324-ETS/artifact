@@ -13,7 +13,7 @@
     "lint": "phpunit --no-coverage --filter SyntaxCheckTest",
     "test": "phpunit --no-coverage",
     "test:coverage": "phpunit --coverage-text --coverage-clover build/coverage/clover.xml --coverage-html build/coverage/html",
-    "build": "@php build.php",
+    "build": "@php scripts/build.php",
     "ci": [
       "@lint",
       "@test:coverage"

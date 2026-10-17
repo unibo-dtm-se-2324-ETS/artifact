@@ -4,14 +4,16 @@
          colors="true"
          cacheDirectory=".phpunit.cache">
   <testsuites>
-    <testsuite name="Expense Tracker Unit Tests">
+    <testsuite name="Unit">
       <directory>tests/unit</directory>
+    </testsuite>
+    <testsuite name="Integration">
+      <directory>tests/integration</directory>
     </testsuite>
   </testsuites>
   <source>
     <include>
-      <file>src/expense-helpers.php</file>
-      <file>src/report-helpers.php</file>
+      <directory suffix=".php">src</directory>
     </include>
   </source>
   <coverage includeUncoveredFiles="true">

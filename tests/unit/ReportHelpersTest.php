@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../../src/report-helpers.php';
-
 final class ReportHelpersTest extends TestCase
 {
     protected function setUp(): void
     {
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/report-helpers.php';
         $_GET = array();
         $_POST = array();
     }
