@@ -17,6 +17,9 @@
       <file>src/report-helpers.php</file>
       <file>src/expense-service.php</file>
       <file>src/account-service.php</file>
+      <file>src/item-service.php</file>
+      <file>src/category-service.php</file>
+      <file>src/recurring-service.php</file>
     </include>
   </source>
   <coverage includeUncoveredFiles="true">
