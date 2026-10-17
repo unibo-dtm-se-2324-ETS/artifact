@@ -83,14 +83,22 @@ The release package can be built locally with `composer build`, which writes `bu
 
 ### PHP test coverage
 
-Measured with PHPUnit and PCOV (113 tests, all passing), 17 October 2026:
+Measured with PHPUnit and PCOV (263 tests, all passing), 17 October 2026:
 
 | File | Statements | Methods | Covered statements |
 |---|---|---|---|
-| `src/expense-helpers.php` | 87.1% | 100.0% | 182/209 |
-| `src/expense-service.php` | 90.5% | 100.0% | 114/126 |
-| `src/report-helpers.php` | 80.8% | 100.0% | 21/26 |
-| **Total** | **87.8%** | **100.0%** | **317/361** |
+| `src/account-service.php` | 100.0% | 100.0% | 101/101 |
+| `src/category-service.php` | 100.0% | 100.0% | 100/100 |
+| `src/dashboard-service.php` | 100.0% | 100.0% | 166/166 |
+| `src/expense-helpers.php` | 100.0% | 100.0% | 210/210 |
+| `src/expense-service.php` | 100.0% | 100.0% | 126/126 |
+| `src/item-service.php` | 100.0% | 100.0% | 43/43 |
+| `src/recurring-service.php` | 100.0% | 100.0% | 84/84 |
+| `src/report-helpers.php` | 100.0% | 100.0% | 26/26 |
+| `src/report-service.php` | 100.0% | 100.0% | 143/143 |
+| **Total** | **100.0%** | **100.0%** | **999/999** |
+
+All the application logic and every database query live in `src/`; the files in `public/` only call it and show the result, and the browser test walks through them. The CI pipeline fails if the coverage of `src/` drops below 95%.
 
 The table is regenerated on every push by the CI workflow and appears on the run's Summary page on GitHub; the full HTML report is attached to the run as the `coverage-report` artifact. The page files are not part of the unit-test coverage and are checked by the browser test below.
 

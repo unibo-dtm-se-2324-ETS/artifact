@@ -8,19 +8,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
-- `src/expense-service.php`: validation, filtering, CSV rows and the create, find, update, delete and
-  search operations for expenses, moved out of the pages and covered by 32 new tests. It was built
-  test-first: the failing tests were committed before the implementation.
-- The browser test now also checks the CSV export and the edit and delete flows.
-- Test coverage is now 87.8% (317 of 361 statements).
+- Services in `src/` that hold all the logic and every database query of the application:
+  `expense-service.php`, `account-service.php`, `item-service.php`, `category-service.php`,
+  `recurring-service.php`, `dashboard-service.php` and `report-service.php`. The expense service was
+  built test-first: the failing tests were committed before the implementation.
+- 263 tests (from 80): unit tests, database tests against a separate test database, and failure tests
+  that make a table unavailable to check that every service reports a failure instead of crashing.
+- The browser test now also checks the CSV exports, editing and deleting an expense, the dashboard
+  and every report page.
+- Test coverage of `src/` is now 100% (999 of 999 statements).
+
+### Security
+- Login, registration, password recovery, password change, the item list and the report pages no
+  longer build SQL from user input; they use prepared statements, which closes SQL injection.
+- Passwords are stored with `password_hash()` instead of MD5. Accounts that still have an MD5 hash
+  keep working and are upgraded the next time the user logs in.
+- The session id is renewed at login, and the item names and the dates shown by the older report
+  are escaped before they are printed.
 
 ### Fixed
-- Deleting an expense reports failure when nothing was deleted, so another user's expense or an
-  unknown id is no longer reported as deleted.
+- Deleting something that does not exist, or that belongs to another user (an expense, an item, a
+  category, a budget or a recurring expense), is reported as a failure instead of a success.
+- The dashboard's previous month is correct on the last days of a month (on 31 March it used to
+  look at March itself).
 
 ### Changed
-- `add-expense.php`, `edit-expense.php` and `manage-expense.php` use the expense service; the
-  duplicated validation and SQL are gone.
+- All pages use the services; the pages are 765 lines shorter (4,519 down to 3,754) and contain no database query.
+- CI fails when the statement coverage drops below 95% (it was 80%).
+- `expense_handle_receipt_upload()` accepts an optional upload folder and file mover so that it can be
+  tested.
 - Tests are split into `tests/unit`, `tests/integration` and `tests/e2e`.
 - `build.php` moved to `scripts/build.php`; the Sass source moved to `resources/sass/`.
 - Presentations moved to `docs/presentations/`.
