@@ -13,13 +13,7 @@
   </testsuites>
   <source>
     <include>
-      <file>src/expense-helpers.php</file>
-      <file>src/report-helpers.php</file>
-      <file>src/expense-service.php</file>
-      <file>src/account-service.php</file>
-      <file>src/item-service.php</file>
-      <file>src/category-service.php</file>
-      <file>src/recurring-service.php</file>
+      <directory suffix=".php">src</directory>
     </include>
   </source>
   <coverage includeUncoveredFiles="true">

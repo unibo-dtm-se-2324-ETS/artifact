@@ -68,6 +68,27 @@ abstract class DatabaseTestCase extends TestCase
         }
     }
 
+    /** @var string[] */
+    private array $brokenTables = array();
+
+    /**
+     * Makes a table unavailable for the rest of the test, to check how the code behaves when the
+     * database fails. The table is put back after the test.
+     */
+    protected function breakTable(string $table): void
+    {
+        mysqli_query(self::$con, "RENAME TABLE $table TO {$table}_broken");
+        $this->brokenTables[] = $table;
+    }
+
+    protected function tearDown(): void
+    {
+        foreach ($this->brokenTables as $table) {
+            mysqli_query(self::$con, "RENAME TABLE {$table}_broken TO $table");
+        }
+        $this->brokenTables = array();
+    }
+
     protected function query(string $sql): array
     {
         $result = mysqli_query(self::$con, $sql);

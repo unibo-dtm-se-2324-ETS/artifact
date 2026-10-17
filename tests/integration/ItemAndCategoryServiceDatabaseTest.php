@@ -3,15 +3,21 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/DatabaseTestCase.php';
-require_once __DIR__ . '/../../src/expense-helpers.php';
-require_once __DIR__ . '/../../src/item-service.php';
-require_once __DIR__ . '/../../src/category-service.php';
 
 /**
  * Integration tests for items, categories and monthly budgets.
  */
 final class ItemAndCategoryServiceDatabaseTest extends DatabaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/expense-helpers.php';
+        require_once __DIR__ . '/../../src/item-service.php';
+        require_once __DIR__ . '/../../src/category-service.php';
+    }
+
     private function insertCategory(int $userId, string $name): int
     {
         mysqli_query(self::$con, sprintf("INSERT INTO tblcategories (UserId, CategoryName) VALUES (%d, '%s')", $userId, mysqli_real_escape_string(self::$con, $name)));

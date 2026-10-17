@@ -5,14 +5,18 @@ declare(strict_types=1);
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../../src/expense-helpers.php';
-require_once __DIR__ . '/../../src/recurring-service.php';
-
 /**
  * Tests for the recurring-expense form handling, which needs no database.
  */
 final class RecurringFormTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/expense-helpers.php';
+        require_once __DIR__ . '/../../src/recurring-service.php';
+    }
+
     private function validForm(): array
     {
         return array('item' => 'Rent', 'cost' => '500', 'currency' => 'USD', 'categoryid' => '3', 'frequency' => 'monthly', 'startdate' => '2026-05-01', 'notes' => '');

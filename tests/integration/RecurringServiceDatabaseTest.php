@@ -3,14 +3,20 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/DatabaseTestCase.php';
-require_once __DIR__ . '/../../src/expense-helpers.php';
-require_once __DIR__ . '/../../src/recurring-service.php';
 
 /**
  * Integration tests for creating, listing, changing and deleting recurring expense rules.
  */
 final class RecurringServiceDatabaseTest extends DatabaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/expense-helpers.php';
+        require_once __DIR__ . '/../../src/recurring-service.php';
+    }
+
     private function form(array $changes = array()): array
     {
         return array_merge(array(

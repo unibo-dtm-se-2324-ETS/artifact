@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import time
+from datetime import date
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -193,6 +194,41 @@ def add_recurring_expense(page: Page, item_name: str, category_name: str) -> Non
     expect(page.locator("td").filter(has_text=item_name).first).to_be_visible()
 
 
+def check_dashboard_and_reports(page: Page) -> None:
+    today = date.today()
+
+    goto_app(page, "dashboard.php")
+    expect(page.get_by_text("Last 7 Days").first).to_be_visible()
+    expect(page.get_by_text("Active Days").first).to_be_visible()
+
+    reports = [
+        (f"expense-datewise-reports-detailed.php?fromdate=2000-01-01&todate={today.isoformat()}&currency=USD", "Avg / Day"),
+        (f"expense-monthwise-reports-detailed.php?frommonth=2000-01&tomonth={today.strftime('%Y-%m')}&currency=USD", "Avg / Month"),
+        (f"expense-yearwise-reports-detailed.php?fromyear=2000&toyear={today.year}&currency=USD", "Avg / Year"),
+    ]
+    for path, label in reports:
+        goto_app(page, path)
+        expect(page.get_by_text("Range:").first).to_be_visible()
+        expect(page.get_by_text(label).first).to_be_visible()
+
+    # the last report shown is the yearly one: its CSV export has a header and a grand total
+    with page.expect_download() as download_info:
+        page.get_by_role("link", name="Export CSV").click()
+    content = Path(download_info.value.path()).read_text(encoding="utf-8")
+    lines = [line for line in content.splitlines() if line.strip()]
+    assert lines[0] == "Year,Total,Currency", lines[0]
+    assert lines[-1].startswith('"Grand Total",'), lines[-1]
+
+    goto_app(page, "expense-datewise-reports-detailed.php?fromdate=2026-12-31&todate=2026-01-01&currency=USD")
+    expect(page.get_by_text("From date cannot be after To date.")).to_be_visible()
+
+    goto_app(page, "expense-reports.php")
+    page.locator("#fromdate").fill("2000-01-01")
+    page.locator("#todate").fill(today.isoformat())
+    page.get_by_role("button", name="Submit").click()
+    expect(page.get_by_text("Expense Report from")).to_be_visible()
+
+
 def check_authenticated_navigation(page: Page) -> None:
     pages = [
         ("dashboard.php", "Expense overview"),
@@ -241,6 +277,7 @@ def run_full_app_test(browser) -> None:
         edit_expense(page, item_name)
         delete_expense(page, item_name)
         add_recurring_expense(page, item_name, category_name)
+        check_dashboard_and_reports(page)
         check_authenticated_navigation(page)
     except Exception:
         save_failure_artifacts(page, "full-site-e2e-failure")

@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../../src/expense-helpers.php';
-require_once __DIR__ . '/../../src/account-service.php';
-
 /**
  * Tests for the password handling and the profile form, which need no database.
  */
 final class AccountServiceTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/expense-helpers.php';
+        require_once __DIR__ . '/../../src/account-service.php';
+    }
+
     public function testHashedPasswordsAreVerifiedAndNeverStoredAsPlainText(): void
     {
         $hash = auth_hash_password('Secret123!');

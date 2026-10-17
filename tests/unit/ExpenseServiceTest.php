@@ -5,15 +5,19 @@ declare(strict_types=1);
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../../src/expense-helpers.php';
-require_once __DIR__ . '/../../src/expense-service.php';
-
 /**
  * Tests for the parts of the expense service that need no database:
  * form validation, filter normalisation, query building and CSV rows.
  */
 final class ExpenseServiceTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/expense-helpers.php';
+        require_once __DIR__ . '/../../src/expense-service.php';
+    }
+
     private function validForm(): array
     {
         return array('dateexpense' => '2026-05-16', 'item' => 'Coffee', 'costitem' => '3.50');

@@ -3,14 +3,20 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/DatabaseTestCase.php';
-require_once __DIR__ . '/../../src/expense-helpers.php';
-require_once __DIR__ . '/../../src/expense-service.php';
 
 /**
  * Integration tests for creating, reading, updating, deleting and searching expenses.
  */
 final class ExpenseServiceDatabaseTest extends DatabaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/expense-helpers.php';
+        require_once __DIR__ . '/../../src/expense-service.php';
+    }
+
     private function form(array $changes = array()): array
     {
         return array_merge(array(
@@ -106,6 +112,20 @@ final class ExpenseServiceDatabaseTest extends DatabaseTestCase
         $id = $this->insertExpense(1, 'Mine', 5, '2026-05-01', '2026-05-01 08:00:00');
 
         $this->assertFalse(expense_delete(self::$con, 2, $id));
+        $this->assertNotNull(expense_find(self::$con, 1, $id));
+    }
+
+    public function testDeleteReportsFailureAndKeepsTheExpenseWhenTheDatabaseRefusesTheDelete(): void
+    {
+        $id = $this->insertExpense(1, 'Mine', 5, '2026-05-01', '2026-05-01 08:00:00');
+        mysqli_query(self::$con, "CREATE TRIGGER refuse_expense_delete BEFORE DELETE ON tblexpense FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'refused'");
+
+        try {
+            $this->assertFalse(expense_delete(self::$con, 1, $id));
+        } finally {
+            mysqli_query(self::$con, 'DROP TRIGGER IF EXISTS refuse_expense_delete');
+        }
+
         $this->assertNotNull(expense_find(self::$con, 1, $id));
     }
 

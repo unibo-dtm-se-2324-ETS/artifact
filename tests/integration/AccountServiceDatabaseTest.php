@@ -3,14 +3,20 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/DatabaseTestCase.php';
-require_once __DIR__ . '/../../src/expense-helpers.php';
-require_once __DIR__ . '/../../src/account-service.php';
 
 /**
  * Integration tests for registration, login, password handling and the profile.
  */
 final class AccountServiceDatabaseTest extends DatabaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/expense-helpers.php';
+        require_once __DIR__ . '/../../src/account-service.php';
+    }
+
     private function insertUser(string $email, string $password, string $mobile = '555', string $name = 'Ada', bool $legacy = false): int
     {
         $hash = $legacy ? md5($password) : auth_hash_password($password);

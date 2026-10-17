@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/DatabaseTestCase.php';
-require_once __DIR__ . '/../../src/expense-helpers.php';
 
 /**
  * Integration tests for the database helper functions.
@@ -11,6 +10,13 @@ require_once __DIR__ . '/../../src/expense-helpers.php';
  */
 final class DatabaseHelpersTest extends DatabaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Loaded here, inside the running test, so that the code coverage includes the files.
+        require_once __DIR__ . '/../../src/expense-helpers.php';
+    }
+
     // expense_prepare_and_execute / fetch helpers
 
     public function testPrepareAndExecuteReturnsFalseForInvalidSql(): void
